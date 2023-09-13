@@ -92,6 +92,7 @@ app.get("/close-poll/:id", async (req, res) => {
 
 app.get("/create-challenge", (_req, res) => {
   const challenge = challengeStore.create();
+
   res.send({ challenge });
 });
 

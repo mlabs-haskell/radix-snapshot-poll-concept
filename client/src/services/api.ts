@@ -30,6 +30,7 @@ export const ApiService = (baseUrl: string) => {
     voteTokenResource: string;
   }) => Promise<string> = (poll) =>
     post("/create-poll", poll).then((res) => res.pollId);
+
   const getPolls: () => Promise<{
     polls: {
       id: string;

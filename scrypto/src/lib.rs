@@ -50,8 +50,8 @@ mod vote {
     impl Vote {
         /// Returns the component address and a bucket containing the
         /// admin badge for the organization
-        pub fn instantiate_vote(org_name: String) -> (Global<Vote>, Bucket) {
-            let admin_bucket: Bucket = ResourceBuilder::new_fungible(OwnerRole::None)
+        pub fn instantiate_vote(org_name: String) -> (Global<Vote>, FungibleBucket) {
+            let admin_bucket: FungibleBucket = ResourceBuilder::new_fungible(OwnerRole::None)
                 .divisibility(DIVISIBILITY_NONE)
                 .metadata(metadata!(
                     init {
@@ -60,7 +60,7 @@ mod vote {
                 ))
                 .mint_initial_supply(1);
 
-            let component_badge: Bucket = ResourceBuilder::new_fungible(OwnerRole::None)
+            let component_badge: FungibleBucket = ResourceBuilder::new_fungible(OwnerRole::None)
                 .divisibility(DIVISIBILITY_NONE)
                 .metadata(metadata!(
                     init {
@@ -128,7 +128,7 @@ mod vote {
                 org_name,
                 current_vote: None,
                 admin_badge: admin_bucket.resource_manager(),
-                component_badge: Vault::with_bucket(component_badge),
+                component_badge: Vault::with_bucket(component_badge.into()),
                 vote_results: Vault::new(vote_badge.address()),
             }
             .instantiate()

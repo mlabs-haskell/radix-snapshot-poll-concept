@@ -1,4 +1,4 @@
-import { readFileSync, writeFileSync } from "fs";
+import { writeFileSync } from "fs";
 import {
   ManifestBuilder,
   PrivateKey,
@@ -28,17 +28,8 @@ import {
   TransactionCommittedDetailsResponse,
   TransactionStatusResponse,
 } from "@radixdlt/babylon-gateway-api-sdk";
-// import { PublishPackageAdvanced } from "@radixdlt/radix-engine-toolkit/dist/models/transaction/instruction";
-import { SLIP10Node } from "@metamask/key-tree";
 
 let gatewayBaseUrl = "https://rcnet-v3.radixdlt.com";
-
-let votePackageAddr =
-  "package_tdx_d_1p4dfl5futstan4685698g9czuc6x9qwk7042rvuykz6fh04z7danm3";
-let voteComponentAddr =
-  "component_tdx_d_1czp3kwtwjpkcj0m6umyh6xuzm48ycp97f483szz4nft7q8cxwtj56e";
-let adminVoteResourceAddr =
-  "resource_tdx_d_1t564wm6t9tnvg2h448yz66wvwz8lu34r976a4s4qz5ncsasjde365j";
 
 let actors = {
   admin: new PrivateKey.Secp256k1(
@@ -54,16 +45,6 @@ let actors = {
     "174e1e288d72d81eba48482a6559761c64d5bf702edd902b9f2bc2e689717062",
   ),
 };
-
-const voteCode = (() => {
-  const fileBuffer = readFileSync("./simple_vote.wasm");
-  return new Uint8Array(fileBuffer);
-})();
-
-const voteSchema = (() => {
-  const fileBuffer = readFileSync("./simple_vote.rpd");
-  return new Uint8Array(fileBuffer);
-})();
 
 const getCurrentEpoch = (status: Status) =>
   status.getCurrent().then((o) => o.ledger_state.epoch);
@@ -437,70 +418,11 @@ const main = async () => {
     applicationName: "Snapshot Polling Concept",
   });
 
-  // const coreClient = await CoreApiClient.initialize({
-  //   basePath: "http://127.0.0.1:3333/core",
-  //   logicalNetworkName: "ansharnet",
-  // });
-  //
-
   printAddresses();
-
-  // const r = await coreClient.state.innerClient.stateAccountPost({
-  //   stateAccountRequest: {
-  //     network: "ansharnet",
-  //     account_address:(await getAddress(actors.user1)).value,
-  //   }
-  // })
-
-  // const entityDetails = await stateApi.stateEntityDetails({
-  //   stateEntityDetailsRequest: {
-  //     addresses: [
-  //        // "account_tdx_e_12y9fkl4zt6mq9y4xp7y87nxhluws48a5pfuxpygepwqklt8h23xhyv",
-  //        // "account_tdx_e_12y9fkl4zt6mq9y4xp7y87nxhluws48a5pfuxpygepwqklt8h23xhyv",
-  //        // "account_tdx_e_12y9fkl4zt6mq9y4xp7y87nxhluws48a5pfuxpygepwqklt8h23xhyv",
-  //        // "account_tdx_e_12y9fkl4zt6mq9y4xp7y87nxhluws48a5pfuxpygepwqklt8h23xhyv",
-  //        // "account_tdx_e_12y9fkl4zt6mq9y4xp7y87nxhluws48a5pfuxpygepwqklt8h23xhyv",
-  //        // "account_tdx_e_12y9fkl4zt6mq9y4xp7y87nxhluws48a5pfuxpygepwqklt8h23xhyv",
-  //        // "account_tdx_e_12y9fkl4zt6mq9y4xp7y87nxhluws48a5pfuxpygepwqklt8h23xhyv",
-  //        // "account_tdx_e_12y9fkl4zt6mq9y4xp7y87nxhluws48a5pfuxpygepwqklt8h23xhyv",
-  //        // "account_tdx_e_12y9fkl4zt6mq9y4xp7y87nxhluws48a5pfuxpygepwqklt8h23xhyv",
-  //        // "account_tdx_e_12y9fkl4zt6mq9y4xp7y87nxhluws48a5pfuxpygepwqklt8h23xhyv",
-  //       // (await RadixEngineToolkit.Utils.knownAddresses(NetworkId.Zabanet).then(x => x.resourceAddresses.xrd)),
-  //       "resource_tdx_e_1t4gn2pa9nwkzwxumvn9ukvqu6m96g6zd69nl4k4py4t423w0qncmzj",
-  //       // (await getAddress(actors.user1)),
-  //       // (await getAddress(actors.user2)),
-  //       // (await getAddress(actors.admin)),
-  //     ]
-  //   }
-  // })
-
-  // writeFileSync('response.json', JSON.stringify(entityDetails, null, 2));
-
-  // const entityNonFungiblePaged = await stateApi.entityNonFungiblesPage({
-  //   stateEntityNonFungiblesPageRequest: {
-  //     address: (await getAddress(actors.user1)),
-  //   },
-  // });
-
-  //const nonFungibleIds = await stateApi.nonFungibleIds({
-  //  stateNonFungibleIdsRequest: {
-  //    resource_address: "resource_tdx_d_1n2p5gq2f7g00ag2ndug0983s2xy7kq8esdvumf3mvelt5kn7jehr8v",
-  //  }
-  //})
-
-  // const nonFungibleData = await stateApi.nonFungibleData({
-  //   stateNonFungibleDataRequest: {
-  //     resource_address: "resource_tdx_d_1n2p5gq2f7g00ag2ndug0983s2xy7kq8esdvumf3mvelt5kn7jehr8v",
-  //     non_fungible_ids: [
-  //       "{7e8bdbd2cf231059-7ba24f1c2b6ff067-89c58903e50e160b-e0f6b57e292d90b7}"
-  //     ]
-  //   }
-  // })
 
   // const fr = await submitFaucetTransaction(actors.admin, txApi, statusApi, "account_tdx_e_1295y4zwa9hp5w4ffk3642l24rk2ex23uhuzlrtcfmudy8ccqzw0thg");
   // console.log(fr)
 
-  // await waitUntilSuccessfull(txApi, fr.id).then((txStatus) => console.log(txStatus))
   await getCurrentEpoch(gapi.status).then((e) => console.log(e));
 
   // const cr = await createAndMintFungibleGovernanceToken(actors.admin, txApi, statusApi, "SnapshotGov1", "SG1", "account_tdx_e_1295y4zwa9hp5w4ffk3642l24rk2ex23uhuzlrtcfmudy8ccqzw0thg", 10)
@@ -527,24 +449,6 @@ const main = async () => {
   );
   await waitUntilSuccessfull(gapi.transaction)(txRes.id).then(console.log);
 
-  // await waitUntilSuccessfull(txApi, res.id);
-  // const txDetails = await getTransactionDetails(txApi, res.id);
-  // console.log(txDetails);
-  // writeFileSync("response.json", JSON.stringify(txDetails, null, 2));
-
-  // // await waitUntilSuccessfull(txApi, cr.id).then((txStatus) => console.log(txStatus))
-  // // console.log(cr);
-  // console.log(
-  //   OwnerRoleToJSON({
-  //     rule: { type: "DenyAll" },
-  //     updater: "None",
-  //   }),
-  // );
-
-  // publish package, initialise vote, become member
-  // let txId = await publishVote(actors.admin, txApi, statusApi, voteCode, voteSchema);
-  // let txId = await submitInitVote(actors.admin, txApi, statusApi, votePackageAddr);
-  // let txId = await becomeMember(actors.admin, txApi, statusApi, voteComponentAddr, adminVoteResourceAddr, await getAddress(actors.user1));
 };
 
 main();
