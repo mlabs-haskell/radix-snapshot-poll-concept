@@ -33,9 +33,9 @@ services:
       RADIXDLT_NETWORK_SEEDS_REMOTE: "${RADIXDLT_NETWORK_SEEDS_REMOTE}"
       RADIXDLT_GENESIS_DATA: "${RADIXDLT_GENESIS_DATA}"
     volumes:
-      -  "./container-volumes/node/ledger:/home/radixdlt/RADIXDB"
-      -  "./container-volumes/node/key:/home/radixdlt/key"
-      -  "./container-volumes/node/logs:/home/radixdlt/logs"
+      -  radix-ledger-data:/home/radixdlt/RADIXDB
+      -  radix-key-data:/home/radixdlt/key
+      -  ./container-volumes/node/logs:/home/radixdlt/logs
 
   postgres_db:
     # Based on https://github.com/radixdlt/babylon-gateway/blob/0dbe2c10a6460b17ce85bd97374017d23d4eeab8/deployment/docker-compose.yml#L28
@@ -103,3 +103,10 @@ services:
       database_migrations:
         condition: service_completed_successfully
 
+volumes:
+  radix-ledger-data:
+    external: true
+    name: radix-ledger-data
+  radix-key-data:
+    external: true
+    name: radix-key-data
