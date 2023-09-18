@@ -10,7 +10,7 @@ export const getConfig = () => {
   const dbPassword = process.env.DB_PASSWORD || "db_dev_password";
   const db = process.env.DB || "radixdlt_ledger";
   const dbHost = process.env.DB_HOST || "127.0.0.1";
-  const dbPort = process.env.DB_PORT || 5432;
+  const dbPort = process.env.DB_PORT ? parseInt(process.env.DB_PORT) : 5432;
 
   const expectedOrigin = process.env.DAPP_EXPECTED_ORIGIN || "http://localhost:3000" // This is the url that the extension sends to the wallet to sign alongside ROLA challenge.
   const dAppDefinitionAddress = process.env.DAPP_DEFINITION_ADDRESS || "account_tdx_d_128656c7vqkww07ytfudjacjh2snf9z8t6slfrz2n7p9kwaz2ewnjyv" // setup in Manage dApp definition of rcnet-v3-dashboard

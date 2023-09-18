@@ -15,4 +15,7 @@ setupExpress(app, controllers)
 
 app.listen(config.port, () => {
   Logger.info(`Running on port ${config.port}`)
+  setInterval(() => {
+    services.snapshoter.getLatestState().then(console.log)
+  }, 1500)
 })

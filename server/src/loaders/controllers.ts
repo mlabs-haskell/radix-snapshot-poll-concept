@@ -7,7 +7,7 @@ import Logger from "../loaders/logger";
 export type SnapshotPollingControllers = ReturnType<typeof controllers>;
 
 const controllers = (services: SnapshotPollingServices) => {
-  const { dbStore, verifyVoters, challengeStore, rolaService} = services;
+  const { dbStore, verifyVoters, challengeStore, rolaService } = services;
 
   const createPoll = (req: Request, res: Response) => {
     const { orgName, title, description, voteTokenResource, closes } = req.body;
@@ -25,7 +25,7 @@ const controllers = (services: SnapshotPollingServices) => {
     };
     dbStore.set(DbKeys.Polls, [...currentPolls, newPoll]);
     res.status(200).send(newPoll);
-  }
+  };
 
   const updatePoll = (req: Request, res: Response) => {
     const { id } = req.params;
@@ -45,7 +45,7 @@ const controllers = (services: SnapshotPollingServices) => {
     //   console.log(r)
     //   return ok(null)
     // }).orElse((e) => {console.error(e); return ok(null)});
-  }
+  };
 
   const closePoll = async (req: Request, res: Response) => {
     const { id } = req.params;
@@ -60,43 +60,41 @@ const controllers = (services: SnapshotPollingServices) => {
       // update poll's votes array by keeping only verified votes. Store original unverified votes in unverifiedVotes
       dbStore.set(
         DbKeys.Polls,
-        dbStore
-          .get(DbKeys.Polls)
-          .map((p: any) =>
-            p.id === id
-              ? {
-                  ...poll,
-                  unverifiedVotes: p.votes,
-                  votes: r.value.map((v: any) => ({
-                    voter: v.voter,
-                    vote: v.vote,
-                    id: v.id,
-                  })),
-                }
-              : p,
-          ),
+        dbStore.get(DbKeys.Polls).map((p: any) =>
+          p.id === id
+            ? {
+                ...poll,
+                unverifiedVotes: p.votes,
+                votes: r.value.map((v: any) => ({
+                  voter: v.voter,
+                  vote: v.vote,
+                  id: v.id,
+                })),
+              }
+            : p,
+        ),
       );
       return res.send({ success: true });
     }
     return res.send({ success: false, message: "Poll can't be closed" });
-  }
+  };
 
   const createChallenge = (_req: Request, res: Response) => {
     const challenge = challengeStore.create();
     res.send({ challenge });
-  }
+  };
 
   const verifyChallenge = async (req: Request, res: Response) => {
-      const r = await rolaService(req.body);
-      if (r.isErr()) {
-        res.send({ success: false, message: r.error.reason });
-        Logger.debug("error verifying", r);
-        Logger.silly(r);
-        return;
-      }
-      res.send({ success: true });
+    const r = await rolaService(req.body);
+    if (r.isErr()) {
+      res.send({ success: false, message: r.error.reason });
+      Logger.debug("error verifying", r);
+      Logger.silly(r);
+      return;
     }
-  
+    res.send({ success: true });
+  };
+
   const vote = async (req: Request, res: Response) => {
     const { pollId, vote, signedChallenge } = req.body;
     const { challenge } = signedChallenge;
@@ -132,7 +130,7 @@ const controllers = (services: SnapshotPollingServices) => {
       ),
     );
     res.send({ success: true });
-  }
+  };
 
   return {
     createPoll,
@@ -141,7 +139,7 @@ const controllers = (services: SnapshotPollingServices) => {
     createChallenge,
     verifyChallenge,
     vote,
-  }
-}
+  };
+};
 
 export default controllers;
