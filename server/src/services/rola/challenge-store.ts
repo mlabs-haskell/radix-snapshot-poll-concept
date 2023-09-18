@@ -1,5 +1,6 @@
-import { DbInterface, DbKeys } from "../db-store"
-import { secureRandom } from "../helpers/crypto"
+import { secureRandom } from "../../helpers/crypto"
+import { DbInterface, DbKeys } from "../../services/db-store"
+
 
 // A simple in-memory store for challenges. A database should be used in production.
 export const ChallengeStore = (db: DbInterface) => {

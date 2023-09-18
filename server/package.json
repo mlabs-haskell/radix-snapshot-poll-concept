@@ -34,6 +34,8 @@
     "elliptic": "^6.5.4",
     "express": "^4.18.2",
     "neverthrow": "^6.0.0",
-    "tiny-secp256k1": "^2.2.3"
+    "snapshoter": "file:../snapshoter",
+    "tiny-secp256k1": "^2.2.3",
+    "winston": "^3.10.0"
   }
 }

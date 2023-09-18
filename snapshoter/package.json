@@ -1,4 +1,12 @@
 {
+  "name": "snapshoter",
+  "version": "1.0.0",
+  "description": "",
+  "main": "build/lib.js",
+  "types": "build/lib.d.ts",
+  "files": [
+    "/build"
+  ],
   "devDependencies": {
     "typescript": "^5.2.2"
   },
