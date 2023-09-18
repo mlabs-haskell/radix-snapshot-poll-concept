@@ -1,7 +1,10 @@
-import openConnection from "./db";
-import { initDbSnapshots } from "./db_snapshotter"
-import { spam } from "./spammer";
-import { XRD_ADDRS } from "./test_addresses";
+import { spam } from "./bench/spammer";
+import { XRD_ADDRS } from "./bench/test_addresses";
+import postgres from "postgres";
+import { initDbSnapshots } from "./db_snapshoter";
+
+/** Code for debugging and benchmarking
+ */
 
 // These are Misha's test accounts atm
 const TEST_ACCOUNTS = [
@@ -17,10 +20,19 @@ const TOKENS = {
   SG4: 'resource_tdx_e_1thmnph8gg88pmfethyy2s7k5pjz54fmfnlskd6a8y3qtwjter47nas'
 }
 
-// see if both queries gives consistent results
+const openConnection = () =>
+  postgres({
+    database: "radixdlt_ledger",
+    user: "db_dev_superuser",
+    password: "db_dev_password",
+    host: "127.0.0.1",
+    port: 5432,
+  });
+
+// Check if both queries gives consistent results
 async function testDb1() {
-  const connection = openConnection();
-  const snapshots = initDbSnapshots(connection);
+  const sql = openConnection();
+  const snapshots = initDbSnapshots(sql);
   for (const v of KNOWN_VERSIONS) {
     console.log("State version:", v);
     const snapshotV1 = (await snapshots.makeSnapshotV1(TOKENS.SG4, v))._unsafeUnwrap();
@@ -38,7 +50,7 @@ async function testDb1() {
       }
     });
   };
-  connection.end()
+  sql.end()
 }
 
 // test how queries perform for getting balances for all XRD tokens for known state
@@ -49,8 +61,8 @@ async function testDb1() {
     V2 snapshot size:  533
 */
 async function testDb2() {
-  const connection = openConnection();
-  const snapshots = initDbSnapshots(connection);
+  const sql = openConnection();
+  const snapshots = initDbSnapshots(sql);
   const v = 3297103;
   const token = TOKENS.XRD;
 
@@ -70,16 +82,38 @@ async function testDb2() {
   console.log("V1 snapshot size: ", snapshotV1.size())
   console.log("V2 snapshot size: ", snapshotV2.size())
 
-  connection.end()
+  sql.end()
+}
+
+/* Spam DB with query that currently candidate for taking snapshots.
+   Misha's avg out:
+    Spam stats for 10000 requests with 1 ms delays
+    Longest request: 54.976940002292395
+    Fastest request: 1.044368002563715
+    Average: 4.567872644603625
+*/
+async function getCurrentState() {
+  const sql = openConnection();
+  const snapshots = initDbSnapshots(sql);
+  const ledgerState = await snapshots.currentState();
+  console.log("Current state: ", ledgerState);
+  sql.end()
+}
+
+async function runSpammer() {
+  const sql = openConnection();
+  await spam(10000, 1, sql);
 }
 
 async function runTests() {
-  console.log("----- testDb1 -----")
+  console.log("----- testDb1 -----");
   await testDb1();
-  console.log("\n----- testDb2 -----")
+  console.log("\n----- testDb2 -----");
   await testDb2();
-  console.log("\n----- spam DB -----")
-  spam(10000, 1)
+  console.log("\n----- Current state -----");
+  await getCurrentState();
+  console.log("\n----- spam DB -----");
+  runSpammer();
 }
 
-runTests()
+runTests();

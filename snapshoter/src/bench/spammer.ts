@@ -1,16 +1,15 @@
-import openConnection, { Db } from "./db";
-import { initDbSnapshots } from "./db_snapshotter";
-import { OwnerAddress, Snapshots, TokenAddress } from "./types";
+import { Sql } from "postgres";
+import { initDbSnapshots } from "../db_snapshoter";
+import { OwnerAddress, Snapshots, TokenAddress } from "../types";
 
 /// Spams DB with requests.
 /// For each request it takes some known token address and random subset of known account addresses
-export async function spam(numOfRequests: number, delayMs: number) {
-  const connection = openConnection();
-  const snapshots = initDbSnapshots(connection);
+export async function spam(numOfRequests: number, delayMs: number, sql: Sql) {
+  const snapshots = initDbSnapshots(sql);
   const v = 3297103;
-  const tokenAddresses = await allFungibleAddresses(connection);
-  const accounts = await allAccounts(connection);
-  
+  const tokenAddresses = await allFungibleAddresses(sql);
+  const accounts = await allAccounts(sql);
+
   let stats: number[] = [];
   let requests = [];
   for (let i = 0; i < numOfRequests; i++) {
@@ -24,7 +23,7 @@ export async function spam(numOfRequests: number, delayMs: number) {
   for (const r of requests) {
     await r;
   }
-  connection.end()
+  sql.end()
   const avg = (stats.reduce((a, b) => a + b, 0)) / stats.length;
   console.log(`
     Spam stats for ${stats.length} requests with ${delayMs} ms delays
@@ -53,7 +52,7 @@ async function timedRequest(
 }
 
 
-async function allFungibleAddresses(sql: Db) {
+async function allFungibleAddresses(sql: Sql) {
   const q = sql`
   select distinct address
   from entities
@@ -62,7 +61,7 @@ async function allFungibleAddresses(sql: Db) {
   return (await q).map(r => r.address);
 }
 
-async function allAccounts(sql: Db) {
+async function allAccounts(sql: Sql) {
   const q = sql`
   select distinct address
   from entities
