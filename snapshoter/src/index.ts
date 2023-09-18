@@ -1,7 +1,7 @@
 import openConnection from "./db";
 import { initDbSnapshots } from "./db_snapshotter"
-import { spam } from "./spammer";
-import { XRD_ADDRS } from "./test_addresses";
+import { spam } from "./bench/spammer";
+import { XRD_ADDRS } from "./bench/test_addresses";
 
 // These are Misha's test accounts atm
 const TEST_ACCOUNTS = [
@@ -73,12 +73,22 @@ async function testDb2() {
   connection.end()
 }
 
+async function getCurrentState() {
+  const connection = openConnection();
+  const snapshots = initDbSnapshots(connection);
+  const ledgerState = await snapshots.currentState();
+  console.log("Current state: ", ledgerState);
+  connection.end()
+}
+
 async function runTests() {
   console.log("----- testDb1 -----")
   await testDb1();
   console.log("\n----- testDb2 -----")
   await testDb2();
-  console.log("\n----- spam DB -----")
+  console.log("\n----- Current state -----")
+  await getCurrentState()
+    console.log("\n----- spam DB -----")
   spam(10000, 1)
 }
 

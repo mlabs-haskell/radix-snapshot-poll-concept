@@ -1,13 +1,14 @@
-import { ResultAsync } from 'neverthrow'
+import { ResultAsync, err, errAsync, ok, okAsync } from 'neverthrow'
 import { Db } from './db'
-import { BalanceInfo, OwnerAddress, Snapshot, Snapshots, StateVersion, TokenAddress } from './types'
-import { Row } from 'postgres'
+import { BalanceInfo, LedgerState, OwnerAddress, Snapshot, Snapshots, StateVersion, TokenAddress } from './types'
+import { Row, RowList } from 'postgres'
 
 export const initDbSnapshots =
   (sql: Db): Snapshots => {
     return {
       makeSnapshotV1: querySnapshotV1(sql),
-      makeSnapshotV2: querySnapshotV2(sql)
+      makeSnapshotV2: querySnapshotV2(sql),
+      currentState: currentState(sql)
     }
   }
 
@@ -81,7 +82,7 @@ const querySnapshotV2 =
       `
       const result = //TODO: maybe verify, that all rows have same `resource_entity_id`, which represents current token
         ResultAsync.fromPromise(pendingQuery, (e: unknown) => e as Error)
-          .map((rowList) =>rowList.map(dbRowToBalanceInfo(tokenAddress)))
+          .map((rowList) => rowList.map(dbRowToBalanceInfo(tokenAddress)))
           .map((bs) => Snapshot.fromBalances(stateVersion, bs))
 
       return result
@@ -96,4 +97,21 @@ const dbRowToBalanceInfo = (tokenAddress: TokenAddress) => (row: Row): BalanceIn
   }
 }
 
-
+const currentState =
+  (sql: Db) => () => {
+    const pendingQuery = sql`
+      select state_version, epoch, round_in_epoch
+      from ledger_transactions
+      order by state_version desc
+      limit 1;
+      `
+    const result = //TODO: maybe verify, that all rows have same `resource_entity_id`, which represents current token
+      ResultAsync.fromPromise(pendingQuery, (e: unknown) => e as Error)
+        .andThen(rows => {
+          const state = rows.pop();
+          return state ?
+            okAsync({ stateVersion: state.state_version, epoch: state.epoch, roundInEpoch: state.round_in_epoch })
+            : errAsync(new Error("Could not get latest state. It is possible only if DB table is empty."))
+        })
+    return result;
+  }

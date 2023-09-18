@@ -1,6 +1,6 @@
-import openConnection, { Db } from "./db";
-import { initDbSnapshots } from "./db_snapshotter";
-import { OwnerAddress, Snapshots, TokenAddress } from "./types";
+import openConnection, { Db } from "../db";
+import { initDbSnapshots } from "../db_snapshotter";
+import { OwnerAddress, Snapshots, TokenAddress } from "../types";
 
 /// Spams DB with requests.
 /// For each request it takes some known token address and random subset of known account addresses
