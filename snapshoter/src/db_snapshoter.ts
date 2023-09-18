@@ -1,17 +1,17 @@
-import { ResultAsync } from 'neverthrow'
-import { Db } from './db'
+import { ResultAsync, errAsync, okAsync } from 'neverthrow'
 import { BalanceInfo, OwnerAddress, Snapshot, Snapshots, StateVersion, TokenAddress } from './types'
-import { Row } from 'postgres'
+import { Row, Sql } from 'postgres'
 
 export const initDbSnapshots =
-  (sql: Db): Snapshots => {
+  (sql: Sql): Snapshots => {
     return {
       makeSnapshotV1: querySnapshotV1(sql),
-      makeSnapshotV2: querySnapshotV2(sql)
+      makeSnapshotV2: querySnapshotV2(sql),
+      currentState: currentState(sql)
     }
   }
 
-const querySnapshotV1 = (sql: Db) => (tokenAddress: TokenAddress, stateVersion: StateVersion) => {
+const querySnapshotV1 = (sql: Sql) => (tokenAddress: TokenAddress, stateVersion: StateVersion) => {
   const pendingQuery = sql`
       with token_res_id as (select id from entities where address = ${tokenAddress}),
            required_state as (select entity_id,
@@ -45,7 +45,7 @@ const querySnapshotV1 = (sql: Db) => (tokenAddress: TokenAddress, stateVersion: 
 }
 
 const querySnapshotV2 =
-  (sql: Db) =>
+  (sql: Sql) =>
     (tokenAddress: TokenAddress, stateVersion: StateVersion, owners: OwnerAddress[]) => {
       const pendingQuery = sql`
   with accounts_ids as (select id, address
@@ -81,7 +81,7 @@ const querySnapshotV2 =
       `
       const result = //TODO: maybe verify, that all rows have same `resource_entity_id`, which represents current token
         ResultAsync.fromPromise(pendingQuery, (e: unknown) => e as Error)
-          .map((rowList) =>rowList.map(dbRowToBalanceInfo(tokenAddress)))
+          .map((rowList) => rowList.map(dbRowToBalanceInfo(tokenAddress)))
           .map((bs) => Snapshot.fromBalances(stateVersion, bs))
 
       return result
@@ -96,4 +96,28 @@ const dbRowToBalanceInfo = (tokenAddress: TokenAddress) => (row: Row): BalanceIn
   }
 }
 
-
+/** Analogous to the way how official Gateway API gets current state.
+ *  See https://github.com/radixdlt/babylon-gateway/blob/99d6506f9f1d9bfbfc73ce881f1b9057a5962900/src/RadixDlt.NetworkGateway.PostgresIntegration/DbQueryExtensions.cs#L73-L79
+*/
+const currentState =
+  (sql: Sql) => () => {
+    const pendingQuery = sql`
+      select state_version, epoch, round_in_epoch
+      from ledger_transactions
+      order by state_version desc
+      limit 1;
+      `
+    const result =
+      ResultAsync.fromPromise(pendingQuery, (e: unknown) => e as Error)
+        .andThen(rows => {
+          const state = rows.pop();
+          return state ?
+            okAsync({
+              stateVersion: state.state_version,
+              epoch: state.epoch,
+              roundInEpoch: state.round_in_epoch
+            })
+            : errAsync(new Error("Could not get latest state. It is possible only if DB table is empty."))
+        })
+    return result;
+  }

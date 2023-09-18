@@ -4,6 +4,12 @@ export type TokenAddress = string;
 export type OwnerAddress = string;
 export type StateVersion = number;
 
+export interface LedgerState {
+  stateVersion: number,
+  epoch: number,
+  roundInEpoch: number
+}
+
 export interface BalanceInfo {
   tokenAddress: TokenAddress,
   ownerAddress: OwnerAddress, // it can be user or script AFAIK
@@ -52,8 +58,8 @@ export interface Snapshots {
 
   makeSnapshotV1(tokenAddress: string, stateVersion: number): ResultAsync<Snapshot, Error>
 
-  /// Accepts list of addresses
+  /** Accepts list of addresses */
   makeSnapshotV2(tokenAddress: string, stateVersion: number, owners: OwnerAddress[]): ResultAsync<Snapshot, Error>
 
+  currentState(): ResultAsync<LedgerState, Error>
 }
-
