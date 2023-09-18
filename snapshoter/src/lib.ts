@@ -10,8 +10,8 @@ const lib = (config: SnapshoterConfig) => {
   const snapshots = initDbSnapshots(conn)
 
   return {
-    v1: snapshots.makeSnapshotV1,
-    v2: snapshots.makeSnapshotV2,
+    snapshotResourceBalances: snapshots.makeSnapshotV1,
+    snapshotResourceBalancesByAddress: snapshots.makeSnapshotV2,
     currentState: snapshots.currentState
   }
 }

@@ -1,7 +1,11 @@
 import { SnapshotPollingServices } from "../loaders/services";
 import { DbKeys } from "../services/db-store";
 
-export default (dbStore: SnapshotPollingServices['dbStore'], verifyVoters: SnapshotPollingServices['verifyVoters']) => async (id: string) => {
+export default (
+    dbStore: SnapshotPollingServices["dbStore"],
+    verifyVoters: SnapshotPollingServices["verifyVoters"],
+  ) =>
+  async (id: string) => {
     const currentMillis = Date.now();
     const poll = dbStore.get(DbKeys.Polls).find((p: any) => p.id === id);
     if (poll && poll.closes < currentMillis) {
@@ -18,12 +22,8 @@ export default (dbStore: SnapshotPollingServices['dbStore'], verifyVoters: Snaps
           p.id === id
             ? {
                 ...poll,
-                unverifiedVotes: p.votes,
-                votes: r.value.map((v: any) => ({
-                  voter: v.voter,
-                  vote: v.vote,
-                  id: v.id,
-                })),
+                votes: p.votes,
+                verifiedVotes: r.value,
               }
             : p,
         ),
@@ -31,4 +31,4 @@ export default (dbStore: SnapshotPollingServices['dbStore'], verifyVoters: Snaps
       return poll;
     }
     throw Error("Poll can't be closed");
-}
+  };

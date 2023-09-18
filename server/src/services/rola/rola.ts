@@ -3,7 +3,11 @@ import { Result, ResultAsync, err, errAsync, ok, okAsync } from "neverthrow";
 import { GatewayService } from "../gateway/gateway";
 import { blake2b } from "./crypto/blake2b";
 import { curve25519, secp256k1 } from "./crypto/curves";
-import { PublicKey, RadixEngineToolkit, address } from "@radixdlt/radix-engine-toolkit";
+import {
+  PublicKey,
+  RadixEngineToolkit,
+  address,
+} from "@radixdlt/radix-engine-toolkit";
 
 export type RolaError = { reason: string; jsError?: Error };
 
@@ -29,11 +33,10 @@ export const RolaFactory =
     const verifyProof = verifyProofFactory(signedChallenge);
 
     const getDerivedAddress = () =>
-      deriveVirtualAddress(signedChallenge, networkId)
-        .mapErr((jsError) => ({
-          reason: "couldNotDeriveAddressFromPublicKey",
-          jsError,
-        }));
+      deriveVirtualAddress(signedChallenge, networkId).mapErr((jsError) => ({
+        reason: "couldNotDeriveAddressFromPublicKey",
+        jsError,
+      }));
 
     const queryLedger = () =>
       gatewayService

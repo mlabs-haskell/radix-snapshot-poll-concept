@@ -78,9 +78,11 @@ const querySnapshotV2 =
              and required_state.state_version = eravh.from_state_version
              and eravh.resource_entity_id = token_res_id.id
              and eravh.entity_id = accounts_ids.id
+       order by eravh.from_state_version desc
       `
       const result = //TODO: maybe verify, that all rows have same `resource_entity_id`, which represents current token
         ResultAsync.fromPromise(pendingQuery, (e: unknown) => e as Error)
+          .andThen(r => {console.log(r); return okAsync(r)})
           .map((rowList) => rowList.map(dbRowToBalanceInfo(tokenAddress)))
           .map((bs) => Snapshot.fromBalances(stateVersion, bs))
 

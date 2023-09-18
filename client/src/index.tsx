@@ -19,7 +19,7 @@ const rdt = RadixDappToolkit({
   onDisconnect: () => console.log('Disconnected!'),
 })
 
-const apiService = ApiService("http://localhost:4000");
+const apiService = ApiService("http://localhost:4000/api");
 
 const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement)
 root.render(
