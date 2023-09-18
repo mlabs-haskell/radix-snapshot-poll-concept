@@ -96,6 +96,9 @@ const dbRowToBalanceInfo = (tokenAddress: TokenAddress) => (row: Row): BalanceIn
   }
 }
 
+/** Analogous to the way how official Gateway API gets current state.
+ *  See https://github.com/radixdlt/babylon-gateway/blob/99d6506f9f1d9bfbfc73ce881f1b9057a5962900/src/RadixDlt.NetworkGateway.PostgresIntegration/DbQueryExtensions.cs#L73-L79
+*/
 const currentState =
   (sql: Sql) => () => {
     const pendingQuery = sql`

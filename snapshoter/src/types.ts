@@ -61,8 +61,5 @@ export interface Snapshots {
   /** Accepts list of addresses */
   makeSnapshotV2(tokenAddress: string, stateVersion: number, owners: OwnerAddress[]): ResultAsync<Snapshot, Error>
 
-  /** Analogous to the way how official Gateway API gets current state.
-   *  See https://github.com/radixdlt/babylon-gateway/blob/99d6506f9f1d9bfbfc73ce881f1b9057a5962900/src/RadixDlt.NetworkGateway.PostgresIntegration/DbQueryExtensions.cs#L73-L79
-  */
   currentState(): ResultAsync<LedgerState, Error>
 }
