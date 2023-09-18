@@ -2,11 +2,14 @@ import {
   HardenedSLIP10Node,
   SLIP10Node,
 } from "@metamask/key-tree";
+import { GatewayApiClient } from "@radixdlt/babylon-gateway-api-sdk";
 import {
+    Convert,
   NetworkId,
   PrivateKey,
   PublicKey,
   RadixEngineToolkit,
+  hash,
 } from "@radixdlt/radix-engine-toolkit";
 
 const getZabanetAddress = (pub: PublicKey) => RadixEngineToolkit.Derive.virtualAccountAddressFromPublicKey(pub, NetworkId.Zabanet);
@@ -56,3 +59,15 @@ export class RootAccount {
     return Promise.all(Array.from(Array(n).keys()).map((i) => this.getBech32Address(i)));
   }
 }
+
+(async () => {
+  const gatewayBaseUrl = "https://rcnet-v3.radixdlt.com";
+  const seed =
+    "limb argue execute custom auto dinosaur bread convince shuffle sorry surprise peanut honey bird grocery nasty fury broom horse share tornado prize jaguar shoe";
+
+  const x = await RootAccount.fromSeed(seed, NetworkId.Zabanet);
+  const prv = await x.getPrivateKey(0)
+  const pub = prv.publicKey()
+  console.log(Convert.Uint8Array.toHexString(hash(pub.bytes)))
+
+})()

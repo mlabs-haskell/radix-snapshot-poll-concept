@@ -12,7 +12,8 @@ const lib = (config: SnapshoterConfig) => {
   return {
     snapshotResourceBalances: snapshots.makeSnapshotV1,
     snapshotResourceBalancesByAddress: snapshots.makeSnapshotV2,
-    currentState: snapshots.currentState
+    currentState: snapshots.currentState,
+    ownerKeys: snapshots.ownerKeys,
   }
 }
 

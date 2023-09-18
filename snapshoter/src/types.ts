@@ -62,4 +62,6 @@ export interface Snapshots {
   makeSnapshotV2(tokenAddress: string, stateVersion: number, owners: OwnerAddress[]): ResultAsync<Snapshot, Error>
 
   currentState(): ResultAsync<LedgerState, Error>
+  
+  ownerKeys(ownerAddress: OwnerAddress): ResultAsync<Uint8Array, Error>
 }

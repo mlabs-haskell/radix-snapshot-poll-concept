@@ -1,11 +1,6 @@
-import snap from "snapshoter";
-import { GatewayService } from "./gateway/gateway";
-import { Result, ResultAsync, ok, okAsync } from "neverthrow";
-import { SnapshotPollingServices, Snapshoter } from "../loaders/services";
+import { ResultAsync } from "neverthrow";
+import { Snapshoter } from "../loaders/services";
 import { LedgerState } from "snapshoter/build/types";
-
-// checks only existence of voteTokenResource at the relevant address. Does not
-// take into account number of tokens held.
 
 type VerifiedVoters = {
   verifiedAt: LedgerState;
@@ -32,7 +27,9 @@ export const VerifyVoters =
             const verifiedVotes = votes
               .map((v: { voter: string; vote: "yes" | "no"; id: string }) => ({
                 ...v,
-                balance: "" + balances.getBalanceInfo(v.voter)?.balance,
+                balance: ((x) => (x ? x.balance.toString() : ""))(
+                  balances.getBalanceInfo(v.voter),
+                ), // TODO: make this more readable
               }))
               .filter((v: any) => v.balance && v.balance.slice(0, -18)); // Remove 18 decimals, 0 will result in emtpy string will get filtered out
 

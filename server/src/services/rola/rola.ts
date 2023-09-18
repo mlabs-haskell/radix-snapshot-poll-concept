@@ -1,24 +1,24 @@
 import { SignedChallenge } from "@radixdlt/radix-dapp-toolkit";
 import { Result, ResultAsync, err, errAsync, ok, okAsync } from "neverthrow";
-import { GatewayService } from "../gateway/gateway";
 import { blake2b } from "./crypto/blake2b";
 import { curve25519, secp256k1 } from "./crypto/curves";
 import {
+  Convert,
   PublicKey,
   RadixEngineToolkit,
-  address,
 } from "@radixdlt/radix-engine-toolkit";
+import { SnapshotPollingServices, Snapshoter } from "../../loaders/services";
 
 export type RolaError = { reason: string; jsError?: Error };
 
 export const RolaFactory =
   ({
-    gatewayService,
+    snapshoter,
     expectedOrigin,
     dAppDefinitionAddress,
     networkId,
   }: {
-    gatewayService: GatewayService;
+    snapshoter: Snapshoter;
     expectedOrigin: string;
     dAppDefinitionAddress: string;
     networkId: number;
@@ -39,13 +39,14 @@ export const RolaFactory =
       }));
 
     const queryLedger = () =>
-      gatewayService
-        .getEntityOwnerKeys(signedChallenge.address)
+      snapshoter
+        .ownerKeys(signedChallenge.address)
+        .map(Convert.Uint8Array.toHexString)
         .mapErr(() => ({ reason: "couldNotVerifyPublicKeyOnLedger" }))
         .map((ownerKeys) => ({
           ownerKeysMatchesProvidedPublicKey: ownerKeys
-            .map((x) => x.toUpperCase())
-            .some((x) => x.includes(hashedPublicKey.toUpperCase())),
+            .toUpperCase()
+            .includes(hashedPublicKey.toUpperCase()),
           ownerKeysSet: !!ownerKeys,
         }));
 

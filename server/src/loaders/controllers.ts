@@ -12,8 +12,7 @@ import { DbKeys } from "../services/db-store";
 export type SnapshotPollingControllers = ReturnType<typeof controllers>;
 
 const controllers = (services: SnapshotPollingServices) => {
-  const { dbStore, verifyVoters, challengeStore, rolaService, snapshoter } =
-    services;
+  const { dbStore, verifyVoters, challengeStore, rolaService } = services;
 
   const getPolls = async (req: Request, res: Response) => {
     Logger.silly("get polls");

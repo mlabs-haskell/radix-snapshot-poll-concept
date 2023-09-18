@@ -7,7 +7,8 @@ export const initDbSnapshots =
     return {
       makeSnapshotV1: querySnapshotV1(sql),
       makeSnapshotV2: querySnapshotV2(sql),
-      currentState: currentState(sql)
+      currentState: currentState(sql),
+      ownerKeys: queryOwnerKeys(sql),
     }
   }
 
@@ -78,11 +79,9 @@ const querySnapshotV2 =
              and required_state.state_version = eravh.from_state_version
              and eravh.resource_entity_id = token_res_id.id
              and eravh.entity_id = accounts_ids.id
-       order by eravh.from_state_version desc
       `
       const result = //TODO: maybe verify, that all rows have same `resource_entity_id`, which represents current token
         ResultAsync.fromPromise(pendingQuery, (e: unknown) => e as Error)
-          .andThen(r => {console.log(r); return okAsync(r)})
           .map((rowList) => rowList.map(dbRowToBalanceInfo(tokenAddress)))
           .map((bs) => Snapshot.fromBalances(stateVersion, bs))
 
@@ -123,3 +122,29 @@ const currentState =
         })
     return result;
   }
+
+const queryOwnerKeys = (sql: Sql) => (ownerAddress: OwnerAddress) => {
+  const pendingQuery = sql`
+    WITH eids AS (
+        SELECT id 
+        FROM entities 
+        WHERE address = ${ownerAddress}
+    )
+
+    SELECT emh.* 
+    FROM entity_metadata_history emh
+    JOIN eids ON emh.entity_id = eids.id
+    WHERE emh.key = 'owner_keys';
+  `
+  
+  const result =
+    ResultAsync.fromPromise(pendingQuery, (e: unknown) => e as Error)
+      .andThen(rows => {
+        const row = rows.pop();
+        return row ?
+          okAsync(new Uint8Array(row.value))
+          : errAsync(new Error("Could not get owner keys."))
+      })
+
+  return result;
+}
