@@ -1,4 +1,3 @@
-import { writeFileSync } from "fs";
 import {
   ManifestBuilder,
   PrivateKey,
@@ -167,6 +166,7 @@ const createAndMintFungibleGovernanceToken =
               // metadata roles
               ValueKind.String,
               ValueKind.Enum,
+              // empty map uses defaults, entries are commented out for reference
               // [str("metadata_setter"), enumeration(0)],
               // [str("metadata_setter_updater"), enumeration(0)],
               // [str("metadata_locker"), enumeration(0)],
@@ -197,24 +197,6 @@ const submitFaucetTransaction =
 
     await submitTx(gapi.transaction)(compiledTx.toByteArray());
     return compiledTx.transactionId;
-
-    // Manual implementation for reference
-    // let pubKey = prvKey.publicKey();
-    // let myAddress =
-    //   await RadixEngineToolkit.Derive.virtualAccountAddressFromPublicKey(
-    //     pubKey,
-    //     NetworkId.Zabanet,
-    //   );
-    // receiver = receiver || myAddress;
-    // const fundManifest = new ManifestBuilder()
-    //   .callMethod(await faucetAddr(), "lock_fee", [decimal(25)])
-    //   .callMethod(await faucetAddr(), "free", [])
-    //   .callMethod(receiver, "try_deposit_batch_or_abort", [
-    //     expression("EntireWorktop"),
-    //     enumeration(0),
-    //   ])
-    //   .build();
-    // return submitTxManifest(gapi)(prvKey)(fundManifest);
   };
 
 const main = async () => {
@@ -228,31 +210,27 @@ const main = async () => {
     applicationName: "Snapshot Polling Concept",
   });
    
-  await getCurrentEpoch(gapi.status).then((e) => console.log(e));
+  // await getCurrentEpoch(gapi.status).then((e) => console.log(e));
 
-  const r = await gapi.state.getEntityDetailsVaultAggregated('account_tdx_e_1295y4zwa9hp5w4ffk3642l24rk2ex23uhuzlrtcfmudy8ccqzw0thg')
-  writeFileSync('response.json', JSON.stringify(r, null, 2))
+  // const r = await gapi.state.getEntityDetailsVaultAggregated('account_tdx_e_1295y4zwa9hp5w4ffk3642l24rk2ex23uhuzlrtcfmudy8ccqzw0thg')
+  // writeFileSync('response.json', JSON.stringify(r, null, 2))
 
-  // const rootAccount = await RootAccount.fromSeed(seed, NetworkId.Zabanet);
-  // const addresses = await rootAccount.deriveAddresses(10);
-  // const mainPrvKey = await rootAccount.getPrivateKey(0);
+  const rootAccount = await RootAccount.fromSeed(seed, NetworkId.Zabanet);
+  const addresses = await rootAccount.deriveAddresses(10);
+  const mainPrvKey = await rootAccount.getPrivateKey(0);
 
   // const fr = await submitFaucetTransaction(gapi)(mainPrvKey)();
   // await waitUntilSuccessfull(gapi.transaction)(fr.id);
-  // console.log(fr)
-
 
   // const cr = await createAndMintFungibleGovernanceToken(actors.admin, txApi, statusApi, "SnapshotGov1", "SG1", "account_tdx_e_1295y4zwa9hp5w4ffk3642l24rk2ex23uhuzlrtcfmudy8ccqzw0thg", 10)
-  // console.log(cr)
   // await waitUntilSuccessfull(txApi, cr.id)
   // const res = await getTransactionDetails(txApi, "txid_tdx_e_1mvwnz03x7krxwpp3aywlkhhpfxkfkr875q2gq96zulutelwudups34ayt2")
-
-  // console.log(addresses)
+  // console.log(res)
 
   // const txRes = await mintAndDistributeGovTokens(gapi)(actors.admin)(
-  //   "SnapshotGov3",
-  //   "SG3",
-  //   10,
+  //   "SnapshotGov5",
+  //   "SG5",
+  //   100,
   //   addresses,
   // );
   // await waitUntilSuccessfull(gapi.transaction)(txRes.id).then(console.log);
