@@ -55,8 +55,7 @@ export class Snapshot {
   private checkConsistency(balance: BalanceInfo) {
     // check that all queried balances have correct state version
     if (balance.fromStateVersion > this.stateVersion) {
-      throw new Error(`Balance info has higher state version than snapshot: ${balance.fromStateVersion} vs. ${this.stateVersion}.
-      Something went very wrong.`);
+      throw new Error(`Tired to add balance info has higher state version than snapshot: ${balance.fromStateVersion} vs. ${this.stateVersion}.Something went very wrong.`);
     }
 
     // check there are no duplicate accounts in the snapshot - should not happen

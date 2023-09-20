@@ -1,12 +1,10 @@
 import { Row, RowList } from "postgres";
-import { BalanceInfo, TokenAddress } from "../types";
 
 export interface ValidRecord {
+  from_state_version: string,
   owner_address: string,
-  from_state_version: number,
-  balance: number,
-  token_id: number,
-  resource_entity_id: number
+  token_id: string,
+  balance: string,
 }
 
 export const validateRecords = (rows: RowList<Row[]>): ValidRecord[] => {
@@ -18,14 +16,15 @@ export const validateRecords = (rows: RowList<Row[]>): ValidRecord[] => {
      in the aggregator database
     */
     if (resourceEntityId === undefined && result.length === 0) {
-      resourceEntityId = r.resource_entity_id;
+      resourceEntityId = r.token_id;
       result.push(mkBalanceRecord(r));
-    } else if (resourceEntityId === r.resource_entity_id) {
+    } else if (resourceEntityId === r.token_id) {
       result.push(mkBalanceRecord(r));
     } else {
       throw new Error(
-        `Inconsistent snapshot state. While adding balances info resource ID was set to ${resourceEntityId},
-        but one of the balances has resource with ID ${r.resource_entity_id}`);
+        `Inconsistent data was returned from the database.
+         While adding balances info resource ID was set to ${resourceEntityId},
+         but one of the balances has resource with ID ${r.resource_entity_id}`);
     }
   })
 
@@ -34,10 +33,9 @@ export const validateRecords = (rows: RowList<Row[]>): ValidRecord[] => {
 
 const mkBalanceRecord = (row: Row): ValidRecord => {
   return {
-    owner_address: row.owner_address,
     from_state_version: row.from_state_version,
-    balance: row.balance,
+    owner_address: row.owner_address,
     token_id: row.token_id,
-    resource_entity_id: row.resource_entity_id,
+    balance: row.balance,
   }
 }

@@ -1,6 +1,6 @@
 import { ResultAsync, errAsync, okAsync } from 'neverthrow'
 import { BalanceInfo, OwnerAddress, Snapshot, Snapshots, StateVersion, TokenAddress } from '../types'
-import { Row, Sql } from 'postgres'
+import { Sql } from 'postgres'
 import { ValidRecord, validateRecords } from './validation'
 
 export const initDbSnapshots =
@@ -26,7 +26,7 @@ const querySnapshotV1 = (sql: Sql) => (tokenAddress: TokenAddress, stateVersion:
                              )
       select eravh.from_state_version,
              eravh.entity_id,
-             eravh.resource_entity_id,
+             eravh.resource_entity_id as token_id,
              eravh.balance,
              es.address as owner_address
       from entity_resource_aggregated_vaults_history eravh,
@@ -95,8 +95,8 @@ const dbRowToBalanceInfo = (tokenAddress: TokenAddress) => (record: ValidRecord)
   return {
     tokenAddress: tokenAddress,
     ownerAddress: record.owner_address,
-    fromStateVersion: record.from_state_version,
-    balance: record.balance
+    fromStateVersion: Number(record.from_state_version),
+    balance: Number(record.balance)
   }
 }
 
