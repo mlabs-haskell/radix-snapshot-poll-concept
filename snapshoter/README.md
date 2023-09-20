@@ -2,11 +2,36 @@
 
 Library to make balance snapshots.
 
-Current setup relies on data aggregator and its database from the [Babylon Gateway](https://github.com/radixdlt/babylon-gateway) tech stack.
+## Current approach
 
-[Deployment documentation](./deploy/README.md) has an example of how to run already pre-configured required services using `docker compose`.
+The current approach is to use a bit customized setup of Network Gateway.
 
-## Working with own hosted database directly
+Official out-of-the box setup for dApp can be found on [this image](https://docs.radixdlt.com/main/node-and-gateway/_images/network-gateway-deployment.png) in [documentation](https://docs.radixdlt.com/main/node-and-gateway/network-gateway-setup.html). Parts that required for snapshot polling prototype are `Full Node`, `Data Aggregator` and `Postgres DB`. To query data from the database we decided to use own simple service/library instead of Gateway. The reasons are:
+- Gateway API method, which can be used to query historical balance for the account, has limit on amount of addresses (about 10) that can be queried in a single request. Also it queries and returns a lot of data (first from database and then over the wire), that are not required to make snapshot polling to work
+- Depending on how snapshot polling will be integrated into frontend, we can provide TS/JS SDK instead of REST API backend, to remove one layer of IO for better throughput
+
+## Requirements
+
+Hardware and software requirements are derived from [official requirements of Network Gateway](https://docs.radixdlt.com/main/node-and-gateway/network-gateway-setup-custom-requirements.html).
+
+TLDR for production environment:
+- `Node`: c5.2xlarge or equivalent, vCPU - 8, RAM - 16 GB, storage - SSD 200 GB, network - up to 10 Gbps, Ubuntu [20.04.2.0](https://releases.ubuntu.com/20.04/)
+- `Data Aggregator` : vCPU - 2, RAM - 4 GB. 
+    - Aggregator reads data from Node and writes to Postgres. Only single aggregator should perform writing at a time
+- Postgres: vCPU 2, RAM - 30 GB, storage - 500 GB
+    - It is recommended to run database on dedicated host
+    - It is recommended to have separated replicas for aggregator and snapshot polling client (i.e. for writes and reads respectively). One write replica and necessary amount of read replicas
+- Snapshot client: depends on the way it will be integrated. TS database query layer itself is very simple and performant - probably no more than 1 vCPU and 1 Gb of RAM under high load. It is stateless, so it is possible to run more than one if required.
+
+For development purposes the whole stack can be run on the single machine with decent CPU under 40-60 Gb of space and 16 Gb RAM.
+
+## Docker compose setup
+
+`docker compose` setup to run all required parts that already preconfigured for tests and development can be found in [deploy](./deploy/) dir. Pleas see [deployment docs](./deploy/README.md) for instructions.
+
+
+
+## Database queries
 
 Currently snapshot package provides two queries to make snapshots:
 
@@ -89,11 +114,5 @@ Currently snapshot package provides two queries to make snapshots:
 
 At the moment, prototype application uses second query when counting votes.
 
-## Making snapshots using Gateway API
-
-The idea was discarded in favor of own DB queries describe above.
-
-Reasons:
-
-- Less communications layers between application and database for better performance
-- The Gateway API method, suitable for querying snapshot data, has low limit (was 10 when we tried) on amount of addresses that can be queried at once.
+## Further considerations:
+- Aggregator reads a lot of data from the node that takes space, but not required for snapshot polling. I suppose, it possible to save a lot of space by making own aggregator, but this task could be pretty time consuming
