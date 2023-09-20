@@ -1,6 +1,7 @@
 import { ResultAsync, errAsync, okAsync } from 'neverthrow'
-import { BalanceInfo, OwnerAddress, Snapshot, Snapshots, StateVersion, TokenAddress } from './types'
-import { Row, Sql } from 'postgres'
+import { BalanceInfo, OwnerAddress, Snapshot, Snapshots, StateVersion, TokenAddress } from '../types'
+import { Sql } from 'postgres'
+import { ValidRecord, validateRecords } from './validation'
 
 export const initDbSnapshots =
   (sql: Sql): Snapshots => {
@@ -25,7 +26,7 @@ const querySnapshotV1 = (sql: Sql) => (tokenAddress: TokenAddress, stateVersion:
                              )
       select eravh.from_state_version,
              eravh.entity_id,
-             eravh.resource_entity_id,
+             eravh.resource_entity_id as token_id,
              eravh.balance,
              es.address as owner_address
       from entity_resource_aggregated_vaults_history eravh,
@@ -37,9 +38,10 @@ const querySnapshotV1 = (sql: Sql) => (tokenAddress: TokenAddress, stateVersion:
             and eravh.resource_entity_id = token_res_id.id
             and eravh.entity_id = es.id
       `
-  const result = //TODO: maybe verify, that all rows have same `resource_entity_id`, which represents current token
+  const result =
     ResultAsync.fromPromise(pendingQuery, (e: unknown) => e as Error)
-      .map((rowList) => rowList.map(dbRowToBalanceInfo(tokenAddress)))
+      .map(validateRecords)
+      .map(records => records.map(dbRowToBalanceInfo(tokenAddress)))
       .map((bs) => Snapshot.fromBalances(stateVersion, bs))
 
   return result
@@ -80,20 +82,21 @@ const querySnapshotV2 =
              and eravh.resource_entity_id = token_res_id.id
              and eravh.entity_id = accounts_ids.id
       `
-      const result = //TODO: maybe verify, that all rows have same `resource_entity_id`, which represents current token
+      const result =
         ResultAsync.fromPromise(pendingQuery, (e: unknown) => e as Error)
-          .map((rowList) => rowList.map(dbRowToBalanceInfo(tokenAddress)))
-          .map((bs) => Snapshot.fromBalances(stateVersion, bs))
+          .map(validateRecords)
+          .map(records => records.map(dbRowToBalanceInfo(tokenAddress)))
+          .map(bs => Snapshot.fromBalances(stateVersion, bs))
 
       return result
     }
 
-const dbRowToBalanceInfo = (tokenAddress: TokenAddress) => (row: Row): BalanceInfo => {
+const dbRowToBalanceInfo = (tokenAddress: TokenAddress) => (record: ValidRecord): BalanceInfo => {
   return {
     tokenAddress: tokenAddress,
-    ownerAddress: row.owner_address,
-    fromStateVersion: row.from_state_version,
-    balance: row.balance
+    ownerAddress: record.owner_address,
+    fromStateVersion: Number(record.from_state_version),
+    balance: Number(record.balance)
   }
 }
 
@@ -138,7 +141,7 @@ const queryOwnerKeys = (sql: Sql) => (ownerAddress: OwnerAddress) => {
     ORDER BY emh.from_state_version DESC
     LIMIT 1;
   `
-  
+
   const result =
     ResultAsync.fromPromise(pendingQuery, (e: unknown) => e as Error)
       .andThen(rows => {

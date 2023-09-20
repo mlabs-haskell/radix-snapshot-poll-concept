@@ -1,9 +1,10 @@
 import { Sql } from "postgres";
-import { initDbSnapshots } from "../db_snapshoter";
+import { initDbSnapshots } from "../db_snapshoter/db_snapshoter";
 import { OwnerAddress, Snapshots, TokenAddress } from "../types";
 
-/// Spams DB with requests.
-/// For each request it takes some known token address and random subset of known account addresses
+/** Spams DB with requests.
+    For each request it takes some known token address and random subset of known account addresses
+*/
 export async function spam(numOfRequests: number, delayMs: number, sql: Sql) {
   const snapshots = initDbSnapshots(sql);
   const v = 3297103;
@@ -26,7 +27,7 @@ export async function spam(numOfRequests: number, delayMs: number, sql: Sql) {
   sql.end()
   const avg = (stats.reduce((a, b) => a + b, 0)) / stats.length;
   console.log(`
-    Spam stats for ${stats.length} requests with ${delayMs} ms delays
+    Spam stats for ${stats.length} requests with ${delayMs} ms delays for arbitrary number of addresses
     Longest request: ${Math.max(...stats)}
     Fastest request: ${Math.min(...stats)}
     Average: ${avg}

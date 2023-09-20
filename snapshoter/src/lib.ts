@@ -1,5 +1,5 @@
 import postgres, { Options } from "postgres";
-import { initDbSnapshots } from "./db_snapshoter";
+import { initDbSnapshots } from "./db_snapshoter/db_snapshoter";
 
 type SnapshoterConfig = {
   db: Options<{}>,
