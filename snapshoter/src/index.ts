@@ -1,7 +1,7 @@
 import { spam } from "./bench/spammer";
 import { XRD_ADDRS } from "./bench/test_addresses";
 import postgres from "postgres";
-import { initDbSnapshots } from "./db_snapshoter";
+import { initDbSnapshots } from "./db_snapshoter/db_snapshoter";
 
 /** Code for debugging and benchmarking
  */
@@ -29,6 +29,7 @@ const openConnection = () =>
     port: 5432,
   });
 
+
 // Check if both queries gives consistent results
 async function testDb1() {
   const sql = openConnection();
@@ -54,7 +55,7 @@ async function testDb1() {
 }
 
 // test how queries perform for getting balances for all XRD tokens for known state
-/* Misha's avg out:
+/* Avg out during testing with only DB running:
     V1 time: 70.80368100013584
     V2 time: 61.12687599938363
     V1 snapshot size:  533
@@ -85,8 +86,8 @@ async function testDb2() {
   sql.end()
 }
 
-/* Spam DB with query that currently candidate for taking snapshots.
-   Misha's avg out:
+/* Spam DB with query which is the current candidate for taking snapshots.
+   Avg out during testing with only DB running:
     Spam stats for 10000 requests with 1 ms delays
     Longest request: 54.976940002292395
     Fastest request: 1.044368002563715
@@ -106,13 +107,14 @@ async function runSpammer() {
 }
 
 async function runTests() {
+  console.log("----- Integration tests -----");
   console.log("----- testDb1 -----");
   await testDb1();
   console.log("\n----- testDb2 -----");
   await testDb2();
   console.log("\n----- Current state -----");
   await getCurrentState();
-  console.log("\n----- spam DB -----");
+  console.log("\n----- Spamming DB -----");
   runSpammer();
 }
 
