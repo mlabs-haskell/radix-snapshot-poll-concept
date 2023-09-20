@@ -137,7 +137,9 @@ const queryOwnerKeys = (sql: Sql) => (ownerAddress: OwnerAddress) => {
     SELECT emh.* 
     FROM entity_metadata_history emh
     JOIN eids ON emh.entity_id = eids.id
-    WHERE emh.key = 'owner_keys';
+    WHERE emh.key = 'owner_keys' AND emh.is_deleted = false
+    ORDER BY emh.from_state_version DESC
+    LIMIT 1;
   `
 
   const result =
