@@ -6,9 +6,10 @@ import CssBaseline from "@mui/material/CssBaseline";
 import Toolbar from "@mui/material/Toolbar";
 import { DataRequestBuilder } from "@radixdlt/radix-dapp-toolkit";
 import { fromPromise } from "neverthrow";
-import {useState, useEffect } from "react";
+import {useState, useEffect, useContext } from "react";
 import CreatePollFormCard from "./components/CreatePollFormCard";
 import PollList from "./components/PollList";
+import { ApiContext } from "./contexts/api";
 import { useApiPolls, useApiStatus, useApiVote } from "./hooks/api";
 import { useRdt, useWalletDataState } from "./hooks/radix";
 

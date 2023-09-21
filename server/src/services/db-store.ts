@@ -1,4 +1,4 @@
-import fs from 'fs';
+import fs from "fs";
 
 export enum DbKeys {
   Polls = "polls",
@@ -8,16 +8,18 @@ export enum DbKeys {
 export type DbInterface = ReturnType<typeof DbStore>;
 
 export const DbStore = (jsonPath: string) => {
-  let db: any= {};
+  let db: any = {};
   try {
-    const rawData = fs.readFileSync(jsonPath, 'utf-8');
+    const rawData = fs.readFileSync(jsonPath, "utf-8");
     db = JSON.parse(rawData);
   } catch (error) {
     console.log("Couldn't load data from file, starting with an empty DB.");
   }
 
-  const persistToDisk = () => new Promise((resolve, reject) => 
-    fs.writeFile(jsonPath, JSON.stringify(db, null, 2), 'utf-8', (err) => {}))
+  const persistToDisk = () =>
+    new Promise((resolve, reject) =>
+      fs.writeFile(jsonPath, JSON.stringify(db, null, 2), "utf-8", (err) => {}),
+    );
 
   return {
     get: (key: string) => {

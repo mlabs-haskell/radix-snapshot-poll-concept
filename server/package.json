@@ -13,6 +13,7 @@
     "@types/bip32": "^2.0.0",
     "@types/bip39": "^3.0.0",
     "nodemon": "^3.0.1",
+    "prettier": "^3.0.3",
     "ts-node": "^10.9.1",
     "typescript": "^5.1.6"
   },
@@ -20,9 +21,9 @@
     "@metamask/key-tree": "^9.0.0",
     "@noble/ed25519": "^2.0.0",
     "@radixdlt/babylon-core-api-sdk": "^0.3.0-rcnet-v3",
-    "@radixdlt/babylon-gateway-api-sdk": "^1.0.0-rc.3.3",
+    "@radixdlt/babylon-gateway-api-sdk": "^1.0.0-rc.3.1.1",
     "@radixdlt/radix-dapp-toolkit": "^0.6.1",
-    "@radixdlt/radix-engine-toolkit": "^0.3.0",
+    "@radixdlt/radix-engine-toolkit": "^0.4.0",
     "@types/cors": "^2.8.13",
     "@types/elliptic": "^6.4.14",
     "@types/express": "^4.17.17",
@@ -34,6 +35,8 @@
     "elliptic": "^6.5.4",
     "express": "^4.18.2",
     "neverthrow": "^6.0.0",
-    "tiny-secp256k1": "^2.2.3"
+    "snapshoter": "file:../snapshoter",
+    "tiny-secp256k1": "^2.2.3",
+    "winston": "^3.10.0"
   }
 }
