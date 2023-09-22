@@ -16,7 +16,7 @@ const controllers = (services: SnapshotPollingServices) => {
 
   const getPolls = async (req: Request, res: Response) => {
     Logger.silly("get polls");
-    const polls = dbStore.get(DbKeys.Polls);
+    const polls = pollsRepo.getAll();
     res.status(200).send(polls);
   };
 
@@ -65,7 +65,7 @@ const controllers = (services: SnapshotPollingServices) => {
 
   const vote = async (req: Request, res: Response) => {
     try {
-      await voteController(dbStore, rolaService)(req.body);
+      await voteController(pollsRepo, rolaService)(req.body);
     } catch (e: unknown) {
       res.status(400).send({ success: false, message: (e as Error).message });
     }

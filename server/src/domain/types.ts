@@ -8,7 +8,7 @@ export interface Poll {
   voteTokenResource: string;
   closes: number;
   closed: boolean;
-  votes: [];
+  votes: Vote[];
 }
 
 export const newPoll = (
@@ -17,7 +17,7 @@ export const newPoll = (
   description: string,
   voteTokenResource: string,
   closes: number
-  ): Poll => {
+): Poll => {
   const id = secureRandom(32);
   return {
     id,
@@ -28,5 +28,25 @@ export const newPoll = (
     closes,
     closed: false,
     votes: [],
+  }
+}
+
+export interface Vote {
+  id: string,
+  voter: string,
+  vote: 'yes' | 'no'
+}
+
+export const addVote = (poll: Poll, vote: Vote): Poll => {
+  return {
+    ...poll,
+    votes: [
+      ...poll.votes,
+      {
+        id: vote.id,
+        voter: vote.voter,
+        vote: vote.vote,
+      },
+    ],
   }
 }

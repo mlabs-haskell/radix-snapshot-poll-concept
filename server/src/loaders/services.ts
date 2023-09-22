@@ -12,7 +12,7 @@ export type Snapshoter = ReturnType<typeof snap>;
 
 const services = (config: SnapshotPollingConfig) => {
   const dbStore = DbStore("db.json");
-  const challengeStore = ChallengeStore(dbStore);
+  const challengeStore = ChallengeStore(DbStore("db_challenge.json"));
   const snapshoter = snap({
     db: {
       db: config.db.db,

@@ -1,0 +1,23 @@
+import { DbStore, DbKeys } from "../src/services/db-store";
+import createPoll from "../src/controllers/create-poll";
+import fs from "fs";
+import { PollsJsonRepo } from "../src/repositories/json-repos";
+import closePollController from "../src/controllers/close-poll";
+
+// const DB_PATH = "./test_db.json"
+
+// const killJsonDb = () => {
+//   fs.unlinkSync(DB_PATH)
+// }
+
+// describe('Close poll controller tests', () => {
+
+//   afterAll(() => {
+//     killJsonDb();
+//   });
+
+//   test('Close poll', () => {
+//     // const dbStore = DbStore("db.json");
+//     // const closedPoll = closePollController(dbStore, verifyVoters)
+//   });
+// });

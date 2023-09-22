@@ -18,7 +18,7 @@ export const PollsJsonRepo = (jsonPath: string): PollsRepo => {
   }
 
   const persistToDisk = () =>
-    new Promise((resolve, reject) => 
+    new Promise((resolve, reject) =>
       fs.writeFile(jsonPath, JSON.stringify(inMemDb, null, 2), "utf-8", (err) => { }),
     ).then(() => console.log("PERSISTED"));
 
@@ -27,6 +27,12 @@ export const PollsJsonRepo = (jsonPath: string): PollsRepo => {
   return {
     getById: (pollId: string) => pollsRecords().find((p: Poll) => p.id === pollId),
     addPoll: (poll: Poll) => { inMemDb[POLLS_KEY] = [...pollsRecords(), poll], persistToDisk() },
-    getAll: () => pollsRecords()
+    getAll: () => pollsRecords(),
+    update: (updated: Poll) => {
+      const newRecords = pollsRecords()
+        .map((current: Poll) => current.id === updated.id ? updated : current);
+      inMemDb[POLLS_KEY] = [...newRecords];
+      persistToDisk()
+    }
   }
 }
