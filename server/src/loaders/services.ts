@@ -4,6 +4,8 @@ import { RolaFactory } from "../services/rola/rola";
 import { ChallengeStore } from "../services/rola/challenge-store";
 import { SnapshotPollingConfig } from "../config";
 import { VerifyVoters } from "../services/verify-voters";
+import { PollsRepo } from "../repositories/types";
+import { PollsJsonRepo } from "../repositories/json-repos";
 
 export type SnapshotPollingServices = ReturnType<typeof services>;
 export type Snapshoter = ReturnType<typeof snap>;
@@ -29,12 +31,15 @@ const services = (config: SnapshotPollingConfig) => {
   });
   const verifyVoters = VerifyVoters(snapshoter);
 
+  const pollsRepo: PollsRepo = PollsJsonRepo("db.json");
+
   return {
     dbStore,
     challengeStore,
     rolaService,
     verifyVoters,
     snapshoter,
+    pollsRepo
   };
 };
 

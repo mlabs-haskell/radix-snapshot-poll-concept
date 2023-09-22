@@ -1,8 +1,7 @@
-import { secureRandom } from "../helpers/crypto";
-import { SnapshotPollingServices } from "../loaders/services";
-import { DbKeys } from "../services/db-store";
+import { Poll, newPoll } from "../domain/types";
+import { PollsRepo } from "../repositories/types";
 
-export default (dbStore: SnapshotPollingServices["dbStore"]) =>
+export default (pollsRepo: PollsRepo) =>
   ({
     orgName,
     title,
@@ -15,19 +14,8 @@ export default (dbStore: SnapshotPollingServices["dbStore"]) =>
     description: string;
     voteTokenResource: string;
     closes: number;
-  }) => {
-    const id = secureRandom(32);
-    const currentPolls = dbStore.get(DbKeys.Polls) || [];
-    const newPoll = {
-      id,
-      orgName,
-      title,
-      description,
-      voteTokenResource,
-      closes,
-      closed: false,
-      votes: [],
-    };
-    dbStore.set(DbKeys.Polls, [...currentPolls, newPoll]);
-    return newPoll;
+  }): Poll => {
+    const poll = newPoll(orgName, title, description, voteTokenResource, closes);
+    pollsRepo.addPoll(poll);
+    return poll;
   };

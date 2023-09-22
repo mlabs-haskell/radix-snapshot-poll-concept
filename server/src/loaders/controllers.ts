@@ -12,7 +12,7 @@ import { DbKeys } from "../services/db-store";
 export type SnapshotPollingControllers = ReturnType<typeof controllers>;
 
 const controllers = (services: SnapshotPollingServices) => {
-  const { dbStore, verifyVoters, challengeStore, rolaService } = services;
+  const { dbStore, verifyVoters, challengeStore, rolaService, pollsRepo } = services;
 
   const getPolls = async (req: Request, res: Response) => {
     Logger.silly("get polls");
@@ -22,7 +22,7 @@ const controllers = (services: SnapshotPollingServices) => {
 
   const createPoll = async (req: Request, res: Response) => {
     Logger.debug("create poll", req.body);
-    const newPoll = createPollController(dbStore)(req.body);
+    const newPoll = createPollController(pollsRepo)(req.body);
     res.status(200).send(newPoll);
   };
 
