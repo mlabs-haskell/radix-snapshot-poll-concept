@@ -14,7 +14,6 @@ export default (
     vote: "yes" | "no";
     signedChallenge: SignedChallenge;
   }) => {
-    console.log("challenge", JSON.stringify(pollParam))
     const { challenge } = pollParam.signedChallenge;
     const r = await rolaService(pollParam.signedChallenge); // verify signed challenge, returns derived address of signer
     if (r.isErr()) {

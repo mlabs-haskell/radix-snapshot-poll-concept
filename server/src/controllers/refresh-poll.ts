@@ -1,13 +1,16 @@
 import { SnapshotPollingServices } from "../loaders/services";
-import { DbKeys } from "../services/db-store";
 import Logger from "../loaders/logger";
+import { PollsRepo } from "../repositories/types";
 
 export default (
-    dbStore: SnapshotPollingServices["dbStore"],
-    verifyVoters: SnapshotPollingServices["verifyVoters"],
-  ) =>
+  pollsRepo: PollsRepo,
+  verifyVoters: SnapshotPollingServices["verifyVoters"],
+) =>
   async (id: string) => {
-    const poll = dbStore.get(DbKeys.Polls).find((p: any) => p.id === id);
+    const poll = pollsRepo.getById(id);
+    if (!poll) {
+      throw Error("Poll not found");
+    }
     if (poll.closed) {
       throw Error("Poll is closed");
     }

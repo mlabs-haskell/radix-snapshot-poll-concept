@@ -30,7 +30,7 @@ const controllers = (services: SnapshotPollingServices) => {
     const { id } = req.params;
     try {
       const verifiedPoll = await refreshPollController(
-        dbStore,
+        pollsRepo,
         verifyVoters,
       )(id);
       res.status(200).send(verifiedPoll);
