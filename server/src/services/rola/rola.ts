@@ -1,5 +1,5 @@
 import { SignedChallenge } from "@radixdlt/radix-dapp-toolkit";
-import { Result, ResultAsync, err, errAsync, ok, okAsync } from "neverthrow";
+import { Result, ResultAsync, err, errAsync, ok } from "neverthrow";
 import { blake2b } from "./crypto/blake2b";
 import { curve25519, secp256k1 } from "./crypto/curves";
 import {
@@ -7,23 +7,31 @@ import {
   PublicKey,
   RadixEngineToolkit,
 } from "@radixdlt/radix-engine-toolkit";
-import { SnapshotPollingServices, Snapshoter } from "../../loaders/services";
+import { Snapshoter } from "../../loaders/services";
+import { ChallengesRepo } from "../../repositories/types";
 
 export type RolaError = { reason: string; jsError?: Error };
 
 export const RolaFactory =
   ({
     snapshoter,
+    challengesRepo,
     expectedOrigin,
     dAppDefinitionAddress,
     networkId,
   }: {
     snapshoter: Snapshoter;
+    challengesRepo: ChallengesRepo;
     expectedOrigin: string;
     dAppDefinitionAddress: string;
     networkId: number;
   }) =>
   (signedChallenge: SignedChallenge): ResultAsync<string, RolaError> => {
+
+    if (!challengesRepo.existsAndValid(signedChallenge.challenge)) {
+      return errAsync({ reason: "challengeNotFoundOrExpired" });
+    }
+
     const result = createPublicKeyHash(signedChallenge.proof.publicKey);
 
     if (result.isErr()) return errAsync({ reason: "couldNotHashPublicKey" });

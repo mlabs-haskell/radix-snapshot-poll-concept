@@ -28,10 +28,8 @@ describe('Vote tests', () => {
 
     await voteController(pollsRepo, dummyRola)(POLL_PARAMS);
     const votedPoll = pollsRepo.getById(TEST_POLL.id)!;
-    console.log("VOTED POLL", votedPoll)
     expect(votedPoll.votes.length).toBe(1);
     expect(votedPoll.votes[0].id).not.toBe(undefined);
-    console.log("FF", POLL_PARAMS.signedChallenge.address)
     expect(votedPoll.votes[0].voter).toBe(POLL_PARAMS.signedChallenge.address);
     expect(votedPoll.votes[0].vote).toBe(POLL_PARAMS.vote);
   });
