@@ -1,3 +1,4 @@
+import { LedgerState } from "snapshoter/build/types";
 import { secureRandom } from "../helpers/crypto";
 
 export interface Poll {
@@ -9,6 +10,7 @@ export interface Poll {
   closes: number;
   closed: boolean;
   votes: Vote[];
+  verifiedVotes?: VerifiedVoters;
 }
 
 export const newPoll = (
@@ -37,6 +39,11 @@ export interface Vote {
   vote: 'yes' | 'no'
 }
 
+export type VerifiedVoters = {
+  verifiedAt: LedgerState;
+  votes: { voter: string; vote: "yes" | "no"; id: string; balance: string }[];
+};
+
 export const addVote = (poll: Poll, vote: Vote): Poll => {
   return {
     ...poll,
@@ -48,5 +55,13 @@ export const addVote = (poll: Poll, vote: Vote): Poll => {
         vote: vote.vote,
       },
     ],
+  }
+};
+
+export const closePoll = (poll: Poll, verifiedVotes: VerifiedVoters): Poll => {
+  return {
+    ...poll,
+    closed: true,
+    verifiedVotes: verifiedVotes
   }
 }

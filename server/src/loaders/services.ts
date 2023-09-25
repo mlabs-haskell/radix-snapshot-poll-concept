@@ -11,8 +11,8 @@ export type SnapshotPollingServices = ReturnType<typeof services>;
 export type Snapshoter = ReturnType<typeof snap>;
 
 const services = (config: SnapshotPollingConfig) => {
-  const dbStore = DbStore("db.json");
-  const challengeStore = ChallengeStore(DbStore("db_challenge.json"));
+  const pollsRepo: PollsRepo = PollsJsonRepo("storage_polls.json");
+  const challengeStore = ChallengeStore(DbStore("storage_challenges.json"));
   const snapshoter = snap({
     db: {
       db: config.db.db,
@@ -31,10 +31,8 @@ const services = (config: SnapshotPollingConfig) => {
   });
   const verifyVoters = VerifyVoters(snapshoter);
 
-  const pollsRepo: PollsRepo = PollsJsonRepo("db.json");
 
   return {
-    dbStore,
     challengeStore,
     rolaService,
     verifyVoters,
