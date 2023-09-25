@@ -1,12 +1,13 @@
 import { SignedChallenge } from "@radixdlt/radix-dapp-toolkit";
 import { SnapshotPollingServices } from "../loaders/services";
 import Logger from "../loaders/logger";
-import { DbKeys } from "../services/db-store";
+import { PollsRepo } from "../repositories/types";
+import { addVote } from "../domain/types";
 
 export default (
-    dbStore: SnapshotPollingServices["dbStore"],
-    rolaService: SnapshotPollingServices["rolaService"],
-  ) =>
+  pollsRepo: PollsRepo,
+  rolaService: SnapshotPollingServices["rolaService"],
+) =>
   async (pollParam: {
     pollId: string;
     vote: "yes" | "no";
@@ -18,33 +19,19 @@ export default (
       Logger.debug("error verifying", r);
       throw Error(r.error.reason);
     }
-    const poll = dbStore
-      .get(DbKeys.Polls)
-      .find((p: any) => p.id === pollParam.pollId);
+    const poll = pollsRepo.getById(pollParam.pollId);
     if (!poll) throw Error("Poll not found");
     if (poll.closed) throw Error("Poll is closed");
     if (poll.votes.find((v: any) => v.voter === r.value))
       throw Error("Already voted");
 
-    // push vote to poll
-    dbStore.set(
-      DbKeys.Polls,
-      dbStore.get(DbKeys.Polls).map((p: any) =>
-        p.id === pollParam.pollId
-          ? {
-              ...p,
-              votes: [
-                ...p.votes,
-                {
-                  id: challenge,
-                  voter: r.value,
-                  vote: pollParam.vote,
-                },
-              ],
-            }
-          : p,
-      ),
-    );
-
+    const votedPoll = addVote(
+      poll,
+      {
+        id: challenge,
+        voter: r.value,
+        vote: pollParam.vote
+      });
+    pollsRepo.update(votedPoll);
     return;
   };
