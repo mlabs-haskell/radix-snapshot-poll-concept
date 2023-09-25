@@ -6,3 +6,8 @@ export interface PollsRepo {
   getAll(): Poll[]
   update(poll: Poll): void
 }
+
+export interface ChallengesRepo {
+  newChallenge(): string
+  existsAndValid(input: string): boolean
+}

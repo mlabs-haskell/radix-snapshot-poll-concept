@@ -1,4 +1,3 @@
-import { DbStore, DbKeys } from "../src/services/db-store";
 import createPoll from "../src/controllers/create-poll";
 import fs from "fs";
 import { PollsJsonRepo } from "../src/repositories/json-repos";

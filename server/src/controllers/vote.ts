@@ -1,7 +1,6 @@
 import { SignedChallenge } from "@radixdlt/radix-dapp-toolkit";
 import { SnapshotPollingServices } from "../loaders/services";
 import Logger from "../loaders/logger";
-import { DbKeys } from "../services/db-store";
 import { PollsRepo } from "../repositories/types";
 import { addVote } from "../domain/types";
 

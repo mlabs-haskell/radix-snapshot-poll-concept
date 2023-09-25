@@ -7,12 +7,11 @@ import createChallengeController from "../controllers/create-challenge";
 import verifyChallengeController from "../controllers/verify-challenge";
 import voteController from "../controllers/vote";
 import Logger from "./logger";
-import { DbKeys } from "../services/db-store";
 
 export type SnapshotPollingControllers = ReturnType<typeof controllers>;
 
 const controllers = (services: SnapshotPollingServices) => {
-  const { verifyVoters, challengeStore, rolaService, pollsRepo } = services;
+  const { verifyVoters, rolaService, pollsRepo, challengesRepo } = services;
 
   const getPolls = async (req: Request, res: Response) => {
     Logger.silly("get polls");
@@ -50,7 +49,7 @@ const controllers = (services: SnapshotPollingServices) => {
   };
 
   const createChallenge = async (_req: Request, res: Response) => {
-    res.send({ challenge: await createChallengeController(challengeStore)() });
+    res.send({ challenge: await createChallengeController(challengesRepo)() });
   };
 
   const verifyChallenge = async (req: Request, res: Response) => {

@@ -1,7 +1,7 @@
-import { SnapshotPollingServices } from "../loaders/services";
+import { ChallengesRepo } from "../repositories/types";
 
-export default (challengeStore: SnapshotPollingServices["challengeStore"]) =>
+export default (challengesRepo: ChallengesRepo) =>
   async () => {
-    const challenge = challengeStore.create();
+    const challenge = challengesRepo.newChallenge();
     return challenge;
   };
