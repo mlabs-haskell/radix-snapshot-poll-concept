@@ -22,8 +22,6 @@ export const PollsJsonRepo = (jsonPath: string): PollsRepo => {
       fs.writeFile(jsonPath, JSON.stringify(inMemPolls, null, 2), "utf-8", (err) => { }),
     );
 
-  // const pollsRecords = () => inMemDb[POLLS_KEY] || [];
-
   return {
     getById: (pollId: string) => inMemPolls.find((p: Poll) => p.id === pollId),
     addPoll: (poll: Poll) => { inMemPolls = [...inMemPolls, poll], persistToDisk() },
