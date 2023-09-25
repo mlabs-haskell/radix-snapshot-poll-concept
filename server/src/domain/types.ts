@@ -39,9 +39,16 @@ export interface Vote {
   vote: 'yes' | 'no'
 }
 
+export interface VerifiedVote {
+  id: string,
+  voter: string,
+  vote: 'yes' | 'no',
+  balance: number
+}
+
 export type VerifiedVoters = {
   verifiedAt: LedgerState;
-  votes: { voter: string; vote: "yes" | "no"; id: string; balance: string }[];
+  votes: VerifiedVote[];
 };
 
 export const addVote = (poll: Poll, vote: Vote): Poll => {
