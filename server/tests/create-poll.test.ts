@@ -20,7 +20,8 @@ describe('Create poll controller tests', () => {
       orgName: "Test org",
       title: "Test title",
       description: "Test description",
-      voteTokenResource: "token_resource_addrerss",
+      voteTokenResource: "token_resource_address",
+      voteTokenWeight: 1,
       closes: 111111
     };
     const poll = createPoll(pollsRepo)(pollData);

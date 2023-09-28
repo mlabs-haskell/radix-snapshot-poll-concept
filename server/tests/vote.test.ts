@@ -4,7 +4,7 @@ import voteController from "../src/controllers/vote";
 import { SignedChallenge } from "@radixdlt/radix-dapp-toolkit";
 import { ResultAsync, okAsync } from "neverthrow";
 import { RolaError } from "../src/services/rola/rola";
-import { Poll } from "../src/domain/types";
+import { Poll, newPoll } from "../src/domain/types";
 
 const DB_PATH = "./test_db.json";
 const ROLA_RESPONSE = 'account_tdx_e_some_hash';
@@ -35,16 +35,14 @@ describe('Vote tests', () => {
   });
 });
 
-const TEST_POLL: Poll = {
-  id: "804e79cfb631b7e7c93ac34c0093fa981cf08da18ef8f371de45a8624f34cc5b",
-  orgName: "Org",
-  title: "Title",
-  description: "Description",
-  voteTokenResource: "token_res",
-  closes: 1,
-  closed: false,
-  votes: [],
-}
+const TEST_POLL: Poll = newPoll(
+  "Org",
+  "Title",
+  "Description",
+  { resourceAddress: "resource_address", weight: 1 },
+  1
+)
+
 
 const POLL_PARAMS =
   JSON.parse(

@@ -20,6 +20,7 @@ const CreatePollFormCard = ({
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [voteTokenResource, setVoteTokenResource] = useState("");
+  const [voteTokenWeight, setVoteTokenWeight] = useState<number>(1);
   const [closesDuration, setClosesDuration] = useState(60 * 1000); // Initializing with 0, but you can have a default duration
 
   const handleSubmit = () => {
@@ -30,6 +31,7 @@ const CreatePollFormCard = ({
       description,
       closes: closesTimestamp,
       voteTokenResource,
+      voteTokenWeight
     });
   };
 
@@ -75,6 +77,16 @@ const CreatePollFormCard = ({
             variant="standard"
             value={voteTokenResource}
             onChange={(e) => setVoteTokenResource(e.target.value)}
+          />
+        </div>
+        <div>
+          <TextField
+            id="voteTokenWeight"
+            className="w-full"
+            label="Vote Token Weight"
+            variant="standard"
+            value={voteTokenWeight}
+            onChange={(e) => setVoteTokenWeight(Number(e.target.value))}
           />
         </div>
         <Select

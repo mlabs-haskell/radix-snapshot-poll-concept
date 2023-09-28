@@ -28,6 +28,7 @@ export const ApiService = (baseUrl: string) => {
     description: string;
     closes: number;
     voteTokenResource: string;
+    voteTokenWeight: number;
   }) => Promise<string> = (poll) =>
     post("/create-poll", poll).then((res) => res.pollId);
 

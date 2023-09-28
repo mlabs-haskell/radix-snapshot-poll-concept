@@ -15,7 +15,7 @@ export default (
       throw Error("Poll is closed");
     }
 
-    const r = await verifyVoters(poll.voteTokenResource, poll.votes);
+    const r = await verifyVoters(poll.voteToken, poll.votes);
     if (r.isErr()) {
       Logger.error("Failed to verify voters");
       throw Error(r.error.reason);

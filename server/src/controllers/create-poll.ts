@@ -7,15 +7,22 @@ export default (pollsRepo: PollsRepo) =>
     title,
     description,
     voteTokenResource,
+    voteTokenWeight,
     closes,
   }: {
     orgName: string;
     title: string;
     description: string;
     voteTokenResource: string;
+    voteTokenWeight: number;
     closes: number;
   }): Poll => {
-    const poll = newPoll(orgName, title, description, voteTokenResource, closes);
+    const poll = newPoll(
+      orgName,
+      title,
+      description,
+      { resourceAddress: voteTokenResource, weight: voteTokenWeight },
+      closes);
     pollsRepo.addPoll(poll);
     return poll;
   };
