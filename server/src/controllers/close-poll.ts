@@ -10,7 +10,7 @@ export default (
     const currentMillis = Date.now();
     const poll = pollsRepo.getById(id);
     if (poll && poll.closes < currentMillis) {
-      const r = await verifyVoters(poll.voteToken, poll.votes);
+      const r = await verifyVoters(poll);
       if (r.isErr()) {
         throw Error(r.error.reason);
       }

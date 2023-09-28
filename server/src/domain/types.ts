@@ -55,7 +55,7 @@ export const closePoll = (poll: Poll, verifiedVotes: VerifiedVoters): Poll => {
   }
 };
 
-export class VoteToken {
+class VoteToken {
   readonly resourceAddress: string;
   readonly weight: number;
 
