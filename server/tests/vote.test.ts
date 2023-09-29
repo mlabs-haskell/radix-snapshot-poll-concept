@@ -39,9 +39,9 @@ const TEST_POLL: Poll = newPoll(
   "Org",
   "Title",
   "Description",
-  { resourceAddress: "resource_address", weight: 1 },
+  { resourceAddress: "resource_address", weight: 1, powerFormula: 'linear' },
   1
-)
+);
 
 
 const POLL_PARAMS =

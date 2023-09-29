@@ -1,5 +1,6 @@
 import { LedgerState } from "snapshoter/build/types";
 import { secureRandom } from "../helpers/crypto";
+import { PowerFormula, assertIsFormula, powerFormula } from "./power-formula";
 
 export interface Poll {
   readonly id: string;
@@ -17,7 +18,7 @@ export const newPoll = (
   orgName: string,
   title: string,
   description: string,
-  voteTokenData: { resourceAddress: string, weight: number },
+  voteTokenData: { resourceAddress: string, weight: number, powerFormula: PowerFormula },
   closes: number
 ): Poll => {
   const id = secureRandom(32);
@@ -26,7 +27,7 @@ export const newPoll = (
     orgName,
     title,
     description,
-    voteToken: VoteToken.new(voteTokenData.resourceAddress, voteTokenData.weight),
+    voteToken: VoteToken.new(voteTokenData.resourceAddress, voteTokenData.weight, voteTokenData.powerFormula),
     closes,
     closed: false,
     votes: [],
@@ -55,25 +56,27 @@ export const closePoll = (poll: Poll, verifiedVotes: VerifiedVoters): Poll => {
   }
 };
 
-class VoteToken {
+export class VoteToken {
   readonly resourceAddress: string;
   readonly weight: number;
+  readonly powerFormula: PowerFormula;
 
-  private constructor(tokenResource: string, weight: number) {
+  private constructor(tokenResource: string, weight: number, powerFormula: PowerFormula) {
     this.resourceAddress = tokenResource;
     this.weight = weight;
+    this.powerFormula = powerFormula;
   };
 
-  static new(resourceAddress: string, weight: number) {
+  static new(resourceAddress: string, weight: number, powerFormula: PowerFormula) {
     if (!resourceAddress) {
-      throw Error(`Error defining vote token: resource address is empty`);
+      throw Error(`Resource address of vote token is empty`);
     }
     if (!weight || weight < 0) {
-      throw Error(`Error defining vote token: weight is missing or negative: ${weight}`);
+      throw Error(`Weight of vote token is missing or negative: ${weight}`);
     }
-
-    return new VoteToken(resourceAddress, weight);
-  }
+    assertIsFormula(powerFormula);
+    return new VoteToken(resourceAddress, weight, powerFormula);
+  };
 };
 
 export interface Vote {
@@ -90,19 +93,19 @@ export interface VerifiedVote {
   readonly power: number /** `vote token balance` * `vote token weight` */
 };
 
-export const makeVerified = (vote: Vote, verifiedBalance: number, weight: number): VerifiedVote => {
+export const makeVerified = (
+  vote: Vote,
+  verifiedBalance: number,
+  voteToken: VoteToken
+): VerifiedVote => {
+  const weight = voteToken.weight;
   if (verifiedBalance <= 0) {
     throw Error(`Balance of verified vote cant be zero or negative. Balance: ${verifiedBalance}`)
   }
-
-  if (weight <= 0) {
-    throw Error(`Wight of verified vote cant be zero or negative. Weight: ${weight}`)
-  }
-
   return {
     ...vote,
     balance: verifiedBalance,
-    power: verifiedBalance * weight
+    power: powerFormula(voteToken.powerFormula).apply(verifiedBalance,weight) 
   }
 };
 

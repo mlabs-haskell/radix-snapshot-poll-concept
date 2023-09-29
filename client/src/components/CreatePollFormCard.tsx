@@ -11,6 +11,8 @@ import {
 import { useState } from "react";
 import { Api } from "../types";
 
+type PowerFormula = 'linear' | 'quadratic';
+
 const CreatePollFormCard = ({
   onSubmit,
 }: {
@@ -21,17 +23,20 @@ const CreatePollFormCard = ({
   const [description, setDescription] = useState("");
   const [voteTokenResource, setVoteTokenResource] = useState("");
   const [voteTokenWeight, setVoteTokenWeight] = useState<number>(1);
+  const [powerFormula, setPowerFormula] = useState<PowerFormula>('linear');
   const [closesDuration, setClosesDuration] = useState(60 * 1000); // Initializing with 0, but you can have a default duration
 
   const handleSubmit = () => {
     const closesTimestamp = Date.now() + closesDuration;
+
     onSubmit({
       orgName,
       title,
       description,
       closes: closesTimestamp,
       voteTokenResource,
-      voteTokenWeight
+      voteTokenWeight,
+      powerFormula
     });
   };
 
@@ -88,7 +93,16 @@ const CreatePollFormCard = ({
             value={voteTokenWeight}
             onChange={(e) => setVoteTokenWeight(Number(e.target.value))}
           />
+          <Select
+            id="power-formula"
+            value={powerFormula}
+            onChange={(e) => setPowerFormula(e.target.value as PowerFormula)}
+          >
+            <MenuItem value='linear'>linear power calculation</MenuItem>
+            <MenuItem value='quadratic'>quadratic power calculation</MenuItem>
+          </Select>
         </div>
+
         <Select
           id="closes"
           value={closesDuration}

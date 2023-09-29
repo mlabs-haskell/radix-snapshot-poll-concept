@@ -1,4 +1,5 @@
-import { Poll, VerifiedVote, Vote, VoteAggregator, addVote, makeVerified, newPoll } from "../src/domain/types";
+import { Poll, VerifiedVote, Vote, VoteAggregator, VoteToken, addVote, makeVerified, newPoll } from "../src/domain/types";
+import { PowerFormula, powerFormula } from "../src/domain/power-formula";
 
 describe('Domain models tests', () => {
 
@@ -29,22 +30,33 @@ describe('Domain models tests', () => {
   });
 
   test('Can not create poll with invalid token data', () => {
-    const badData1 = { resourceAddress: "", weight: 1 };
-    expect(() => newPoll("Test org", "Test title", "Test description", badData1, 42))
-      .toThrow(new Error('Error defining vote token: resource address is empty'));
+    expect(() => newPoll(
+      "Test org", "Test title", "Test description",
+      linearData("", 1),
+      42))
+      .toThrow(new Error('Resource address of vote token is empty'));
 
-    const badData2 = { resourceAddress: "addr", weight: -1 };
-    expect(() => newPoll("Test org", "Test title", "Test description", badData2, 42))
-      .toThrow(new RegExp('^Error defining vote token: weight is missing or negative'));
+      expect(() => newPoll(
+        "Test org", "Test title", "Test description",
+        linearData("addr", 0),
+        42))
+        .toThrow(new RegExp('^Weight of vote token is missing or negative'));
+  
+
+    expect(() => newPoll(
+      "Test org", "Test title", "Test description",
+      linearData("addr", -1),
+      42))
+      .toThrow(new RegExp('^Weight of vote token is missing or negative'));
   });
 
   test('Votes aggregation', () => {
     const aggregator = new VoteAggregator();
     const testVoteYes: Vote = { id: "not_matter", voter: "not_matter", vote: "yes" };
     const testVoteNo: Vote = { id: "not_matter", voter: "not_matter", vote: "no" };
-    const vVote1 = makeVerified(testVoteYes, 10, 2);
-    const vVote2 = makeVerified(testVoteNo, 10, 2);
-    const vVote3 = makeVerified(testVoteNo, 11, 3);
+    const vVote1 = makeVerified(testVoteYes, 10, VoteToken.new("not_matter", 2, 'linear'));
+    const vVote2 = makeVerified(testVoteNo, 10, VoteToken.new("not_matter", 2, 'linear'));
+    const vVote3 = makeVerified(testVoteNo, 11, VoteToken.new("not_matter", 3, 'linear'));
 
     const expectedAggregated = {
       yes: { count: 1, balance: 10, power: 20 },
@@ -59,7 +71,8 @@ describe('Domain models tests', () => {
 
   test('Building verified vote', () => {
     const vote: Vote = { id: "challenge-1", voter: "address-1", vote: 'yes' };
-    const verifiedVote: VerifiedVote = makeVerified(vote, 111, 2);
+    const verifiedVote: VerifiedVote = makeVerified(vote, 111, testToken(2));
+
     expect(verifiedVote.balance).toBe(111);
     expect(verifiedVote.power).toBe(222);
     expect(verifiedVote.id).toBe(vote.id);
@@ -69,19 +82,46 @@ describe('Domain models tests', () => {
 
   test('Building invalid verified vote fails', () => {
     const vote: Vote = { id: "challenge-1", voter: "address-1", vote: 'yes' };
-    expect(() => makeVerified(vote, 0, 1))
+    expect(() => makeVerified(vote, 0, testToken(1)))
       .toThrow(new RegExp('^Balance of verified vote cant be zero or negative'));
-    expect(() => makeVerified(vote, -1, 1))
+
+    expect(() => makeVerified(vote, -1, testToken(1)))
       .toThrow(new RegExp('^Balance of verified vote cant be zero or negative'));
-    expect(() => makeVerified(vote, 111, 0))
-      .toThrow(new RegExp('^Wight of verified vote cant be zero or negative'));
-    expect(() => makeVerified(vote, 111, -2))
-      .toThrow(new RegExp('^Wight of verified vote cant be zero or negative'));
-    expect(() => makeVerified(vote, 0, 0))
-      .toThrow(new RegExp('^Balance of verified vote cant be zero or negative'));
-    expect(() => makeVerified(vote, -1, -1))
-      .toThrow(new RegExp('^Balance of verified vote cant be zero or negative'));
+
+    expect(() => makeVerified(vote, 111, testToken(0)))
+      .toThrow(new RegExp('^Weight of vote token is missing or negative'));
+
+    expect(() => makeVerified(vote, 111, testToken(-2)))
+      .toThrow(new RegExp('^Weight of vote token is missing or negative'));
+  });
+
+  test('Make vote token', () => {
+    expect(() => VoteToken.new("", 1, 'linear'))
+      .toThrow(new RegExp('^Resource address of vote token is empty'));
+
+    expect(() => VoteToken.new("addr", 0, 'linear'))
+      .toThrow(new RegExp('^Weight of vote token is missing or negative'));
+
+    expect(() => VoteToken.new("addr", -1, 'linear'))
+      .toThrow(new RegExp('^Weight of vote token is missing or negative'));
   });
 });
 
-const voteTokenData = { resourceAddress: "resource_address", weight: 1 };
+type TokenData = { resourceAddress: string, weight: number, powerFormula: PowerFormula }
+const voteTokenData: TokenData =
+{
+  resourceAddress: "resource_address",
+  weight: 1,
+  powerFormula: 'linear'
+};
+
+
+const linearData = (resourceAddress: string, weight: number): TokenData => {
+  return {
+    resourceAddress: resourceAddress,
+    weight: weight,
+    powerFormula: 'linear'
+  };
+};
+
+const testToken = (weight: number) => VoteToken.new("not_matter", weight, 'linear');

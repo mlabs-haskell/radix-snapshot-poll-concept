@@ -1,4 +1,4 @@
-import createPoll from "../src/controllers/create-poll";
+import createPoll, { CreatePollData } from "../src/controllers/create-poll";
 import fs from "fs";
 import { PollsJsonRepo } from "../src/repositories/json-repos";
 
@@ -16,12 +16,13 @@ describe('Create poll controller tests', () => {
 
   test('Create poll', () => {
     const pollsRepo = PollsJsonRepo("./test_db.json")
-    const pollData = {
+    const pollData: CreatePollData = {
       orgName: "Test org",
       title: "Test title",
       description: "Test description",
       voteTokenResource: "token_resource_address",
       voteTokenWeight: 1,
+      powerFormula: 'linear',
       closes: 111111
     };
     const poll = createPoll(pollsRepo)(pollData);
@@ -29,5 +30,4 @@ describe('Create poll controller tests', () => {
     expect(pollsRepo.getById(poll.id)).toBe(poll);
     expect(pollsRepo.getAll().length).toBe(1);
   });
-
 });

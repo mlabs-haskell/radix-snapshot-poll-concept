@@ -55,7 +55,7 @@ const processVotes = (
     if (!balance) continue;
     const verifiedBalance = Math.trunc(balance / BALANCE_DECIMALS);
     if (verifiedBalance <= 0) continue;
-    const verifiedVote = makeVerified(vote, verifiedBalance, tokenWeight);
+    const verifiedVote = makeVerified(vote, verifiedBalance, poll.voteToken);
     result.push(verifiedVote);
     aggregator.add(verifiedVote)
   }

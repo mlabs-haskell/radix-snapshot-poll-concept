@@ -12,7 +12,7 @@ type PollData = {
   orgName: string;
   title: string;
   description: string;
-  voteToken: { resourceAddress: string, weight: number },
+  voteToken: { resourceAddress: string, weight: number, powerFormula: string },
   closes: number;
   closed: boolean;
   // you may wish to further type this depending on the vote structure
@@ -70,6 +70,14 @@ const PollList: React.FC<Props> = ({ data, onClosePoll, onVote }) => {
                 className="text-gray-400 mt-2"
               >
                 Token Weight: {item.voteToken.weight}
+              </Typography>
+            </div>
+            <div className="mt-2">
+              <Typography
+                variant="caption"
+                className="text-gray-400 mt-2"
+              >
+                Power Formula: {item.voteToken.powerFormula}
               </Typography>
             </div>
             <div className="mt-2">

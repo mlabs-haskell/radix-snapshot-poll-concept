@@ -24,7 +24,7 @@ const emptyPoll: Poll = newPoll(
   "Org",
   "Title",
   "Description",
-  { resourceAddress: "resource_address", weight: 1 },
+  { resourceAddress: "resource_address", weight: 1 , powerFormula: 'linear'},
   1
 );
 
