@@ -14,11 +14,12 @@ const dAppId =
 
 const rdt = RadixDappToolkit({
   dAppDefinitionAddress: dAppId,
-  networkId: 13,
+  gatewayBaseUrl: 'https://rcnet-v3.radixdlt.com',
+  networkId: 14,
   onDisconnect: () => console.log('Disconnected!'),
 })
 
-const apiService = ApiService("http://localhost:4000");
+const apiService = ApiService("http://localhost:4000/api");
 
 const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement)
 root.render(

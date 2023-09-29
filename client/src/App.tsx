@@ -6,9 +6,10 @@ import CssBaseline from "@mui/material/CssBaseline";
 import Toolbar from "@mui/material/Toolbar";
 import { DataRequestBuilder } from "@radixdlt/radix-dapp-toolkit";
 import { fromPromise } from "neverthrow";
-import {useState, useEffect } from "react";
+import {useState, useEffect, useContext } from "react";
 import CreatePollFormCard from "./components/CreatePollFormCard";
 import PollList from "./components/PollList";
+import { ApiContext } from "./contexts/api";
 import { useApiPolls, useApiStatus, useApiVote } from "./hooks/api";
 import { useRdt, useWalletDataState } from "./hooks/radix";
 
@@ -85,7 +86,7 @@ const App = () => {
     <CssBaseline>
       <AppBar className="mb-5 w-screen" position="sticky">
         <Toolbar className="w-full max-w-4xl mx-auto" sx={{ p: { sm: 0 } }}>
-          <h1 className="text-3xl font-medium grow">Radix Simple Vote</h1>
+          <h1 className="text-3xl font-medium grow">Snapshot Polling Concept</h1>
           <Button onClick={request} className="m-2 p-2 bg-gray-500 rounded">
             ROLA
           </Button>

@@ -12,11 +12,22 @@ type PollData = {
   orgName: string;
   title: string;
   description: string;
-  voteTokenResource: string;
+  voteToken: { resourceAddress: string, weight: number, powerFormula: string },
   closes: number;
   closed: boolean;
-  votes: any[]; // you may wish to further type this depending on the vote structure
+  // you may wish to further type this depending on the vote structure
+  votes: any[];
+  /** It is possible to calculate final votes and power using "raw" data from
+   * `verifiedVotes.votes` array of the response,
+   * but during votes verification, backend traverses all votes anyway
+   * and collecting aggregated data during this process do not introduce any significant overhead.
+   * So already aggregated data was included into the backend response for easier integration.
+   */
+  verifiedVotes: AggregatedVotes;
 };
+
+type AggregatedVotes = { aggregatedVotes: { yes: AggregatedData, no: AggregatedData } };
+type AggregatedData = { count: number, balance: number, power: number };
 
 type Props = {
   data: PollData[];
@@ -45,12 +56,30 @@ const PollList: React.FC<Props> = ({ data, onClosePoll, onVote }) => {
             <Typography variant="body2" className="mt-2">
               {item.description}
             </Typography>
-            <Typography
-              variant="caption"
-              className="text-gray-400 mt-2 break-all"
-            >
-              Vote Token: {item.voteTokenResource}
-            </Typography>
+            <div className="mt-2">
+              <Typography
+                variant="caption"
+                className="text-gray-400 mt-2 break-all"
+              >
+                Vote Token: {item.voteToken.resourceAddress}
+              </Typography>
+            </div>
+            <div className="mt-2">
+              <Typography
+                variant="caption"
+                className="text-gray-400 mt-2"
+              >
+                Token Weight: {item.voteToken.weight}
+              </Typography>
+            </div>
+            <div className="mt-2">
+              <Typography
+                variant="caption"
+                className="text-gray-400 mt-2"
+              >
+                Power Formula: {item.voteToken.powerFormula}
+              </Typography>
+            </div>
             <div className="mt-2">
               <Typography variant="caption" className="text-gray-500">
                 Closes At: {new Date(item.closes).toLocaleString()}
@@ -66,11 +95,28 @@ const PollList: React.FC<Props> = ({ data, onClosePoll, onVote }) => {
             </div>
             <div className="mt-2">
               <Typography variant="overline">
+                Submitted votes:<br />
                 Yes: {item.votes.filter((v) => v.vote === "yes").length}
                 <br />
                 No: {item.votes.filter((v) => v.vote === "no").length}
               </Typography>
             </div>
+            {item.verifiedVotes && (
+              <>
+                <Typography variant="overline">
+                  Verified votes:<br />
+                </Typography>
+                <Typography variant="overline">
+                  Yes: count:{item.verifiedVotes.aggregatedVotes.yes.count},
+                  tokens: {item.verifiedVotes.aggregatedVotes.yes.balance},
+                  power: {item.verifiedVotes.aggregatedVotes.yes.power}
+                  <br />
+                  No: count:{item.verifiedVotes.aggregatedVotes.no.count},
+                  tokens: {item.verifiedVotes.aggregatedVotes.no.balance},
+                  power: {item.verifiedVotes.aggregatedVotes.no.power}
+                </Typography>
+              </>
+            )}
           </CardContent>
           <CardActions>
             {!item.closed && (
