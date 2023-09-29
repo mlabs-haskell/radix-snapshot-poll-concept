@@ -1,10 +1,5 @@
-import fs from "fs";
-import { PollsJsonRepo } from "../src/repositories/json-repos";
-import voteController from "../src/controllers/vote";
-import { SignedChallenge } from "@radixdlt/radix-dapp-toolkit";
 import { ResultAsync, okAsync } from "neverthrow";
-import { RolaError } from "../src/services/rola/rola";
-import { Poll, Vote } from "../src/domain/types";
+import { Poll, Vote, addVote, newPoll } from "../src/domain/types";
 import { Snapshoter } from "../src/loaders/services";
 import { Snapshot } from "snapshoter/build/types";
 import { BALANCE_DECIMALS, VerifyVoters } from "../src/services/verify-voters";
@@ -12,11 +7,11 @@ import { BALANCE_DECIMALS, VerifyVoters } from "../src/services/verify-voters";
 describe('Verify voters tests', () => {
 
   test('Verify voters', async () => {
-    const verifyVoters = VerifyVoters(MOCK_SNAPSHOTER);
-    const result = await verifyVoters("doesNotMatterMock", VOTES);
+    const verifyVoters = VerifyVoters(mockShapshoter);
+    const result = await verifyVoters(testPoll);
     expect(result.isOk()).toBe(true);
     const verifiedVotes = result._unsafeUnwrap();
-    expect(verifiedVotes.verifiedAt).toBe(EXPECTED_STATE);
+    expect(verifiedVotes.verifiedAt).toBe(expectedState);
     expect(verifiedVotes.votes[0].voter).toBe('a0');
     expect(verifiedVotes.votes[0].balance).toBe(1);
     expect(verifiedVotes.votes[1].voter).toBe('a3');
@@ -24,21 +19,32 @@ describe('Verify voters tests', () => {
   });
 });
 
-const VOTES: Vote[] = [
+
+const emptyPoll: Poll = newPoll(
+  "Org",
+  "Title",
+  "Description",
+  { resourceAddress: "resource_address", weight: 1 , powerFormula: 'linear'},
+  1
+);
+
+const testVotes: Vote[] = [
   { id: "0", voter: "a0", vote: 'yes' },
   { id: "1", voter: "a1", vote: 'yes' },
   { id: "2", voter: "a2", vote: 'no' },
   { id: "3", voter: "a3", vote: 'no' },
   { id: "4", voter: "a4", vote: 'yes' },
   { id: "5", voter: "a5", vote: 'yes' },
-]
+];
 
-const EXPECTED_STATE = { epoch: 11, roundInEpoch: 12, stateVersion: 13 };
+const testPoll = testVotes.reduce((poll, vote) => addVote(poll, vote), emptyPoll);
 
-const MOCK_SNAPSHOTER: Snapshoter = {
-  currentState: () => okAsync(EXPECTED_STATE),
+const expectedState = { epoch: 11, roundInEpoch: 12, stateVersion: 13 };
+
+const mockShapshoter: Snapshoter = {
+  currentState: () => okAsync(expectedState),
   snapshotResourceBalancesByAddress: function (_: string, __: number, ___: string[]): ResultAsync<Snapshot, Error> {
-    return okAsync(MOCK_SNAPSHOT);
+    return okAsync(mockSnapshot);
   },
   snapshotResourceBalances: function (_: string, __: number): ResultAsync<Snapshot, Error> {
     throw new Error("Function not implemented.");
@@ -48,7 +54,7 @@ const MOCK_SNAPSHOTER: Snapshoter = {
   }
 }
 
-const MOCK_SNAPSHOT: Snapshot = Snapshot.fromBalances(1,
+const mockSnapshot: Snapshot = Snapshot.fromBalances(1,
   [{
     fromStateVersion: 1,
     ownerAddress: "a0",

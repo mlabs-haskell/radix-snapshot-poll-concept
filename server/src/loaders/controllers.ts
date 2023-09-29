@@ -21,8 +21,12 @@ const controllers = (services: SnapshotPollingServices) => {
 
   const createPoll = async (req: Request, res: Response) => {
     Logger.debug("create poll", req.body);
-    const newPoll = createPollController(pollsRepo)(req.body);
-    res.status(200).send(newPoll);
+    try {
+      const newPoll = createPollController(pollsRepo)(req.body);
+      res.status(200).send(newPoll);
+    } catch (e: unknown) {
+      res.status(400).send({ success: false, message: (e as Error).message });
+    }
   };
 
   const refreshPoll = async (req: Request, res: Response) => {
