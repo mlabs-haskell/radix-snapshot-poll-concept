@@ -29,8 +29,6 @@ For development purposes the whole stack can be run on the single machine with d
 
 `docker compose` setup to run all required parts that already preconfigured for tests and development can be found in [deploy](./deploy/) dir. Pleas see [deployment docs](./deploy/README.md) for instructions.
 
-
-
 ## Database queries
 
 Currently snapshot package provides two queries to make snapshots:

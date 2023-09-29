@@ -7,7 +7,7 @@ represent votes and evolved into off-ledger snapshot polls.
 
 ### Radix
 
-Radix serves as the underlying distributed ledger technology for this project. As of the time of writing, the smart contract functionality scheduled for the Babylon release is exclusively accessible on the latest testnet (aka Ansharnet or RCnet-V2). To better understand and utilize Radix, consult the following relevant resources (in-order):
+Radix serves as the underlying distributed ledger technology for this project. To better understand and utilize Radix, consult the following relevant resources (in-order):
 
    1. [Radix Documentation](https://docs-babylon.radixdlt.com/main/index.html): The official Radix documentation provides comprehensive insights into the technology, its features, and its usage.
    2. [Scrypto](https://docs-babylon.radixdlt.com/main/scrypto/introduction.html): Although not mandatory for snapshot polling due to its off-ledger nature, the Scrypto section offers an excellent introduction and conceptual understanding of Radix's built-in components and workflows.
@@ -45,8 +45,8 @@ of accounts.
 #### `server`
 Contains the backend for snapshot polling. Responsible for management of polls,
 authentication and voter verification.
-#### `scrypto`
-Contains on-ledger project adapted to scrypto v0.11.0 for an earlier implementation of on-ledger voting mechanism.
-#### `manifests`
-Contains `init.rtm` which has incomplete examples of transaction manifests to
-initialise the on-ledger simple vote components.
+
+#### `snapshoter`
+Contains services and a library for querying historical data on account balances. Its purpose to be a narrower, but more performant replacement for the Gateway API from Gateway SDK.
+
+For more details and deployment instructions please check out [docs](./snapshoter/README.md).
