@@ -90,7 +90,7 @@ export interface VerifiedVote {
   readonly voter: string,
   readonly vote: 'yes' | 'no',
   readonly balance: number,
-  readonly power: number /** `vote token balance` * `vote token weight` */
+  readonly power: number
 };
 
 export const makeVerified = (
