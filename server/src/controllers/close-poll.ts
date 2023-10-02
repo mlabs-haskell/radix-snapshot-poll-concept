@@ -7,8 +7,12 @@ export default (
   verifyVoters: SnapshotPollingServices["verifyVoters"],
 ) =>
   async (id: string) => {
-    const currentMillis = Date.now();
     const poll = pollsRepo.getById(id);
+    if (poll?.closed) {
+      throw Error(`Poll is already closed (ID:  ${poll.id})`)
+    }
+
+    const currentMillis = Date.now();
     if (poll && poll.closes < currentMillis) {
       const r = await verifyVoters(poll);
       if (r.isErr()) {

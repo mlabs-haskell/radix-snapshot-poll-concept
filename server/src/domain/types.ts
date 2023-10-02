@@ -49,6 +49,7 @@ export const addVote = (poll: Poll, vote: Vote): Poll => {
 };
 
 export const closePoll = (poll: Poll, verifiedVotes: VerifiedVoters): Poll => {
+  if (poll.closed) throw Error(`Can not close already closed poll`);
   return {
     ...poll,
     closed: true,
@@ -90,7 +91,7 @@ export interface VerifiedVote {
   readonly voter: string,
   readonly vote: 'yes' | 'no',
   readonly balance: number,
-  readonly power: number /** `vote token balance` * `vote token weight` */
+  readonly power: number
 };
 
 export const makeVerified = (

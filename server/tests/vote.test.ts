@@ -4,10 +4,11 @@ import voteController from "../src/controllers/vote";
 import { SignedChallenge } from "@radixdlt/radix-dapp-toolkit";
 import { ResultAsync, okAsync } from "neverthrow";
 import { RolaError } from "../src/services/rola/rola";
-import { Poll, newPoll } from "../src/domain/types";
+import { mkEmptyPoll, mkTestPoll, testShapshoter } from "./common-mocks";
+import { closePoll } from "../src/domain/types";
+import { VerifyVoters } from "../src/services/verify-voters";
 
 const DB_PATH = "./test_db.json";
-const ROLA_RESPONSE = 'account_tdx_e_some_hash';
 
 const killJsonDb = () => {
   fs.unlinkSync(DB_PATH)
@@ -21,33 +22,47 @@ describe('Vote tests', () => {
 
   test('Vote', async () => {
     const pollsRepo = PollsJsonRepo(DB_PATH);
-    pollsRepo.addPoll(TEST_POLL);
-    const dummyRola = (_challenge: SignedChallenge): ResultAsync<string, RolaError> => {
-      return okAsync(ROLA_RESPONSE)
-    }
+    const emptyPoll = mkEmptyPoll(closingTime);
+    const pollParams = mkParams(emptyPoll.id);
 
-    await voteController(pollsRepo, dummyRola)(POLL_PARAMS);
-    const votedPoll = pollsRepo.getById(TEST_POLL.id)!;
+    pollsRepo.addPoll(emptyPoll);
+    const dummyRola = (_challenge: SignedChallenge): ResultAsync<string, RolaError> => {
+      return okAsync(rolaResponse)
+    };
+
+    await voteController(pollsRepo, dummyRola)(pollParams);
+    const votedPoll = pollsRepo.getById(emptyPoll.id)!;
     expect(votedPoll.votes.length).toBe(1);
     expect(votedPoll.votes[0].id).not.toBe(undefined);
-    expect(votedPoll.votes[0].voter).toBe(POLL_PARAMS.signedChallenge.address);
-    expect(votedPoll.votes[0].vote).toBe(POLL_PARAMS.vote);
+    expect(votedPoll.votes[0].voter).toBe(pollParams.signedChallenge.address);
+    expect(votedPoll.votes[0].vote).toBe(pollParams.vote);
+  });
+
+  test('Vote on closed poll fails', async () => {
+    const pollsRepo = PollsJsonRepo(DB_PATH);
+    const newPoll = mkTestPoll(1);
+    const pollParams = mkParams(newPoll.id);
+    const mockVerifyVoters = (await VerifyVoters(testShapshoter)(newPoll))._unsafeUnwrap();
+    const closedPoll = closePoll(newPoll, mockVerifyVoters);
+    pollsRepo.addPoll(closedPoll);
+    const dummyRola = (_challenge: SignedChallenge): ResultAsync<string, RolaError> => {
+      return okAsync(rolaResponse)
+    };
+
+    voteController(pollsRepo, dummyRola)(pollParams)
+      .catch(e => expect(e.message).toMatch(`Poll is closed`));
   });
 });
 
-const TEST_POLL: Poll = newPoll(
-  "Org",
-  "Title",
-  "Description",
-  { resourceAddress: "resource_address", weight: 1, powerFormula: 'linear' },
-  1
-);
+// currently it is possible to vote till poll is closed explicitly,
+// even if closing time is reached, but close function was not called
+const closingTime = 1;
 
-
-const POLL_PARAMS =
+const rolaResponse = 'account_tdx_e_some_hash';
+const mkParams = (pollId: string) =>
   JSON.parse(
     `{
-  "pollId": "${TEST_POLL.id}",
+  "pollId": "${pollId}",
   "vote": "yes",
   "signedChallenge": {
     "proof": {
@@ -55,7 +70,7 @@ const POLL_PARAMS =
       "signature": "some_signature",
       "curve": "curve25519"
     },
-    "address": "${ROLA_RESPONSE}",
+    "address": "${rolaResponse}",
     "challenge": "some_challenge",
     "type": "account"
   }

@@ -1,5 +1,16 @@
-import { Poll, VerifiedVote, Vote, VoteAggregator, VoteToken, addVote, makeVerified, newPoll } from "../src/domain/types";
-import { PowerFormula, powerFormula } from "../src/domain/power-formula";
+import {
+  Poll,
+  VerifiedVote,
+  VerifiedVoters,
+  Vote,
+  VoteAggregator,
+  VoteToken,
+  addVote,
+  closePoll,
+  makeVerified,
+  newPoll
+} from "../src/domain/types";
+import { PowerFormula } from "../src/domain/power-formula";
 
 describe('Domain models tests', () => {
 
@@ -36,18 +47,47 @@ describe('Domain models tests', () => {
       42))
       .toThrow(new Error('Resource address of vote token is empty'));
 
-      expect(() => newPoll(
-        "Test org", "Test title", "Test description",
-        linearData("addr", 0),
-        42))
-        .toThrow(new RegExp('^Weight of vote token is missing or negative'));
-  
+    expect(() => newPoll(
+      "Test org", "Test title", "Test description",
+      linearData("addr", 0),
+      42))
+      .toThrow(new RegExp('^Weight of vote token is missing or negative'));
+
 
     expect(() => newPoll(
       "Test org", "Test title", "Test description",
       linearData("addr", -1),
       42))
       .toThrow(new RegExp('^Weight of vote token is missing or negative'));
+  });
+
+  test('Close poll', () => {
+    const poll: Poll = newPoll("Test org", "Test title", "Test description", voteTokenData, 42);
+    const vote: Vote = { id: "id-1", voter: "address-1", vote: 'yes' };
+    const verifiedVoters: VerifiedVoters = {
+      verifiedAt: { epoch: 1, roundInEpoch: 1, stateVersion: 1 },
+      aggregatedVotes: { yes: { count: 1, balance: 1, power: 1 }, no: { count: 1, balance: 1, power: 1 } },
+      votes: [makeVerified(vote, 111, poll.voteToken)],
+    };
+
+    const closedPoll = closePoll(poll, verifiedVoters);
+    expect(poll.verifiedVotes).toBe(undefined);
+    expect(closedPoll.verifiedVotes).toBe(verifiedVoters);
+    expect(closedPoll.closed).toBe(true);
+  });
+
+  test('Closing poll twice fails', () => {
+    const poll: Poll = newPoll("Test org", "Test title", "Test description", voteTokenData, 42);
+    const vote: Vote = { id: "id-1", voter: "address-1", vote: 'yes' };
+    const verifiedVoters: VerifiedVoters = {
+      verifiedAt: { epoch: 1, roundInEpoch: 1, stateVersion: 1 },
+      aggregatedVotes: { yes: { count: 1, balance: 1, power: 1 }, no: { count: 1, balance: 1, power: 1 } },
+      votes: [makeVerified(vote, 111, poll.voteToken)],
+    };
+
+    const closedPoll = closePoll(poll, verifiedVoters);
+    expect(() => closePoll(closedPoll, verifiedVoters))
+      .toThrow(`Can not close already closed poll`);
   });
 
   test('Votes aggregation', () => {
