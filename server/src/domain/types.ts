@@ -49,6 +49,7 @@ export const addVote = (poll: Poll, vote: Vote): Poll => {
 };
 
 export const closePoll = (poll: Poll, verifiedVotes: VerifiedVoters): Poll => {
+  if (poll.closed) throw Error(`Can not close already closed poll`);
   return {
     ...poll,
     closed: true,

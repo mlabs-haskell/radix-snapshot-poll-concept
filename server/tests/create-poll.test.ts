@@ -23,7 +23,7 @@ describe('Create poll controller tests', () => {
       voteTokenResource: "token_resource_address",
       voteTokenWeight: 1,
       powerFormula: 'linear',
-      closes: 111111
+      closes: Date.now() - 1000
     };
     const poll = createPoll(pollsRepo)(pollData);
     expect(poll.closed).toBe(false);
